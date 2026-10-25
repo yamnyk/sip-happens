@@ -1,0 +1,35 @@
+# dependencies and build output
+node_modules
+dist
+dev-dist
+coverage
+.vercel
+*.tsbuildinfo
+
+# secrets and local env (only .env.example is tracked)
+.env
+.env.*
+!.env.example
+*.local
+*.pem
+*.key
+client_secret*.json
+service-account*.json
+token.json
+
+# Supabase CLI local state (project ref, link info)
+supabase/.temp/
+supabase/.branches/
+
+# local tool and agent state
+.claude/settings.local.json
+.playwright-mcp/
+
+# editors and OS
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+
+# logs
+*.log
