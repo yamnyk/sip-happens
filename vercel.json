@@ -3,7 +3,7 @@
   "crons": [{ "path": "/api/keepalive", "schedule": "0 6 * * *" }],
   "headers": [
     {
-      "source": "/((?!icons/|apple-touch-icon|favicon|manifest\\.webmanifest).*)",
+      "source": "/((?!icons/(?:apple-touch-icon|icon-192|icon-512|icon-512-maskable)\\.png$|apple-touch-icon\\.png$|apple-touch-icon-precomposed\\.png$|favicon-32\\.png$|favicon\\.PNG$|manifest\\.webmanifest$).*)",
       "headers": [
         { "key": "Referrer-Policy", "value": "no-referrer" },
         { "key": "X-Content-Type-Options", "value": "nosniff" },
