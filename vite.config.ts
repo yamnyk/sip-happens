@@ -25,7 +25,8 @@ export default defineConfig({
     }),
   ],
   test: {
+    // Hook tests opt into jsdom per file with a `// @vitest-environment jsdom` comment.
     environment: 'node',
-    include: ['src/**/*.test.ts', 'server/**/*.test.ts'],
+    include: ['src/**/*.test.{ts,tsx}', 'server/**/*.test.ts', 'contract/**/*.test.ts'],
   },
 });

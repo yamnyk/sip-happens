@@ -16,12 +16,14 @@ A friends-only PWA for logging quick reviews of alcohol (mostly wine, port and g
 
 | Command | What it does |
 |---|---|
-| `npm run dev` | Vite dev server |
-| `npm run build` | Typecheck, then production build into `dist/` |
-| `npm run typecheck` | `tsc --noEmit` |
-| `npm run test` | Vitest (pure logic and handler unit tests) |
-| `npm run preview` | Serve the built `dist/` locally |
-| `npm run bootstrap-admin` | Create the first admin (interactive, hidden password) |
+| `pnpm dev` | Vite dev server |
+| `pnpm build` | Typecheck, then production build into `dist/` |
+| `pnpm typecheck` | `tsc --noEmit` |
+| `pnpm test` | Vitest (pure logic and handler unit tests) |
+| `pnpm lint` | Oxlint |
+| `pnpm format` / `pnpm format:check` | Prettier write / check |
+| `pnpm preview` | Serve the built `dist/` locally |
+| `pnpm bootstrap-admin` | Create the first admin (interactive, hidden password) |
 
 ## Environment variables
 
@@ -43,11 +45,11 @@ Rules:
 
 ## First-time setup
 
-1. `npm install`, then `cp .env.example .env.local` and fill in the `VITE_` values.
+1. `pnpm install`, then `cp .env.example .env.local` and fill in the `VITE_` values.
 2. Apply the schema per [`supabase/README.md`](supabase/README.md): run every file in `supabase/migrations/` in numeric order (`0001_init.sql`, `0002_drink_subtypes.sql`) in the SQL editor (or `supabase db push`). Then in the Supabase dashboard, Authentication, Sign In / Providers: public signups stay disabled and email confirmations stay off.
 3. In the Supabase dashboard, Project Settings, API Keys, Secret keys: copy the secret key into `.env.local` as `SUPABASE_SECRET_KEY`.
 4. Generate a cron secret with `openssl rand -hex 32` and put it into `.env.local` as `CRON_SECRET`.
-5. Run `npm run bootstrap-admin` and enter the first admin's nick and password.
+5. Run `pnpm bootstrap-admin` and enter the first admin's nick and password.
 6. Push the repo to GitHub.
 7. In Vercel, import the repo.
 8. In Vercel Environment Variables, set `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_SECRET_KEY` and `CRON_SECRET`. Do not set `SB_DB_PASSWORD`.
@@ -92,7 +94,7 @@ Rules:
 
 Before deploy:
 
-- [ ] `npm run typecheck`, `npm run test` and `npm run build` pass.
+- [ ] `pnpm typecheck`, `pnpm test` and `pnpm build` pass.
 - [ ] `supabase/tests/admin_flag.sql` prints `admin_flag: all assertions passed` in the SQL editor.
 - [ ] `.gitignore` covers `.env.local`.
 
@@ -116,7 +118,7 @@ On a Vercel preview:
 - **Verified by the owner:** `0001_init.sql` was applied and the app works "okay-ish" locally. **Not verified:** `0002_drink_subtypes.sql` has not been run yet.
 - **Not verified:** the Vercel preview deployment has not been tested.
 - **Not verified:** the PWA install has not been tested on a device.
-- **Not verified:** `npm run bootstrap-admin` has not been run.
+- **Not verified:** `pnpm bootstrap-admin` has not been run.
 - **Not verified:** `revoke_sessions()` deletes from `auth.sessions`; the function owner needs that privilege on the Supabase `auth` schema. If it fails, bans and password resets still apply but old refresh tokens survive; the handlers log the failure and continue.
 - **Not verified:** extensionless-import risk on Vercel was addressed by adding `.js` extensions to server-side imports; confirm on the first preview that `/api/*` loads.
 - **Known gaps (accepted):** `GET /api/invite-status?token=` puts the token in a query string (Vercel logs); JS `toLowerCase` and Postgres `lower` can disagree on rare Unicode nicks (the unique index still protects identity); login brute-force relies on Supabase Auth rate limits; `register` can leave a released invite if GoTrue created the user but the response was lost.

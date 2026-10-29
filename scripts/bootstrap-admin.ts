@@ -1,5 +1,5 @@
 /**
- * One-off: create the first admin. Run with `npm run bootstrap-admin`.
+ * One-off: create the first admin. Run with `pnpm bootstrap-admin`.
  * Prompts for nick and password interactively (password input is not echoed and never touches shell history).
  */
 import readline from 'node:readline';

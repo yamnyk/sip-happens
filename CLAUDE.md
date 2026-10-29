@@ -4,7 +4,7 @@ Friends-only PWA for quick alcohol reviews (wine, port, gin first). Invite-only 
 
 ## Stack
 
-Vite, React 19, TypeScript, Tailwind v4, react-router, TanStack Query, zod, Supabase (Postgres, Auth, RLS), Vercel Functions, vite-plugin-pwa, idb-keyval, Vitest.
+Vite, React 19, TypeScript 7, Tailwind v4, react-router, TanStack Query, zod, Supabase (Postgres, Auth, RLS), Vercel Functions, vite-plugin-pwa, idb-keyval, Vitest, Oxlint, Prettier.
 
 ## Layout
 
@@ -21,8 +21,9 @@ Vite, React 19, TypeScript, Tailwind v4, react-router, TanStack Query, zod, Supa
 
 ## Commands
 
-- `npm run dev`, `npm run build`, `npm run typecheck`, `npm run test`, `npm run preview`
-- `npm run bootstrap-admin` (owner only, interactive)
+- Package manager is pnpm.
+- `pnpm dev`, `pnpm build`, `pnpm typecheck`, `pnpm test`, `pnpm lint`, `pnpm format`, `pnpm format:check`, `pnpm preview`
+- `pnpm bootstrap-admin` (owner only, interactive)
 
 ## Rules
 

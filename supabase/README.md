@@ -23,13 +23,13 @@ supabase db push --password "$SB_DB_PASSWORD"
 ## Then
 
 1. Put `SUPABASE_SECRET_KEY` and `CRON_SECRET` (`openssl rand -hex 32`) into `.env.local`.
-2. Create the first admin: `npm run bootstrap-admin` (interactive nick, hidden password).
+2. Create the first admin: `pnpm bootstrap-admin` (interactive nick, hidden password).
 3. Dashboard, Authentication, Sign In / Providers: public signups stay disabled, email confirmations off.
 
 ## Optional: generate types
 
 ```bash
-npx supabase gen types typescript --project-id <your-project-ref> --schema public > src/types/database.types.ts
+pnpm dlx supabase gen types typescript --project-id <your-project-ref> --schema public > src/types/database.types.ts
 ```
 
 ## Notes
