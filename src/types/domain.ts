@@ -1,7 +1,15 @@
-export const DRINK_TYPES = ['red', 'white', 'rose', 'sparkling', 'port', 'gin', 'other'] as const;
+export const DRINK_TYPES = [
+  "red",
+  "white",
+  "rose",
+  "sparkling",
+  "port",
+  "gin",
+  "other",
+] as const;
 export type DrinkType = (typeof DRINK_TYPES)[number];
 
-export const DRINK_GROUPS = ['wine', 'port', 'gin', 'other'] as const;
+export const DRINK_GROUPS = ["wine", "port", "gin", "other"] as const;
 export type DrinkGroup = (typeof DRINK_GROUPS)[number];
 
 /** Raw per-criterion scores, keyed by criterion key. Integers 0-10. */
@@ -46,7 +54,7 @@ export interface Review {
   updated_at: string;
 }
 
-export type LinkKind = 'invite' | 'reset';
+export type LinkKind = "invite" | "reset";
 
 export interface InviteLink {
   token: string;

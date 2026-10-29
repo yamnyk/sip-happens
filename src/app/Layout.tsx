@@ -1,20 +1,22 @@
-import { Link, NavLink, Navigate, Outlet } from 'react-router';
-import { strings } from '../strings';
-import { AddIcon, CatalogIcon, MineIcon, PeopleIcon } from './icons';
-import { useSession } from './session';
+import { Link, NavLink, Navigate, Outlet } from "react-router";
+import { strings } from "../strings";
+import { AddIcon, CatalogIcon, MineIcon, PeopleIcon } from "./icons";
+import { useSession } from "./session";
 
 const tabs = [
-  { to: '/', label: strings.tabs.catalog, end: true, Icon: CatalogIcon },
-  { to: '/add', label: strings.tabs.add, end: false, Icon: AddIcon },
-  { to: '/mine', label: strings.tabs.mine, end: false, Icon: MineIcon },
-  { to: '/people', label: strings.tabs.people, end: false, Icon: PeopleIcon },
+  { to: "/", label: strings.tabs.catalog, end: true, Icon: CatalogIcon },
+  { to: "/add", label: strings.tabs.add, end: false, Icon: AddIcon },
+  { to: "/mine", label: strings.tabs.mine, end: false, Icon: MineIcon },
+  { to: "/people", label: strings.tabs.people, end: false, Icon: PeopleIcon },
 ] as const;
 
 /** Guards the signed-in area and renders header plus bottom tab bar. */
 export function Layout() {
-  const { session, profile, loading, profileError, retryProfile, signOut } = useSession();
+  const { session, profile, loading, profileError, retryProfile, signOut } =
+    useSession();
 
-  if (loading) return <p className="p-4 text-neutral-400">{strings.common.loading}</p>;
+  if (loading)
+    return <p className="p-4 text-neutral-400">{strings.common.loading}</p>;
   // Do not bounce a valid session to /login just because the profile fetch failed.
   if (profileError)
     return (
@@ -27,7 +29,11 @@ export function Layout() {
         >
           {strings.common.retry}
         </button>
-        <button type="button" onClick={() => void signOut()} className="min-h-11 text-sm text-neutral-400">
+        <button
+          type="button"
+          onClick={() => void signOut()}
+          className="min-h-11 text-sm text-neutral-400"
+        >
           {strings.nav.logout}
         </button>
       </div>
@@ -62,7 +68,7 @@ export function Layout() {
                 aria-label={t.label}
                 title={t.label}
                 className={({ isActive }) =>
-                  `flex min-h-14 items-center justify-center ${isActive ? 'text-amber-400' : 'text-neutral-400'}`
+                  `flex min-h-14 items-center justify-center ${isActive ? "text-amber-400" : "text-neutral-400"}`
                 }
               >
                 <t.Icon className="h-7 w-7" />

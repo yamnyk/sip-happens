@@ -1,6 +1,6 @@
-import { createClient, type SupabaseClient } from '@supabase/supabase-js';
-import { getSupabaseEnv } from './env.js';
-import type { Ports } from './ports.js';
+import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import { getSupabaseEnv } from "./env.js";
+import type { Ports } from "./ports.js";
 
 /** Service-role client. Server only. Never import from src/. */
 let cached: SupabaseClient | null = null;
@@ -8,69 +8,93 @@ let cached: SupabaseClient | null = null;
 export function getAdminClient(): SupabaseClient {
   if (!cached) {
     const { url, secretKey } = getSupabaseEnv();
-    cached = createClient(url, secretKey, { auth: { persistSession: false, autoRefreshToken: false } });
+    cached = createClient(url, secretKey, {
+      auth: { persistSession: false, autoRefreshToken: false },
+    });
   }
   return cached;
 }
 
 /** Ban duration far enough out to be permanent for this app. */
-const BAN_FOREVER = '876000h';
+const BAN_FOREVER = "876000h";
 
 export function createPorts(client: SupabaseClient = getAdminClient()): Ports {
   return {
     links: {
       async claim(token, kind) {
-        const { data, error } = await client.rpc('claim_link', { p_token: token, p_kind: kind });
+        const { data, error } = await client.rpc("claim_link", {
+          p_token: token,
+          p_kind: kind,
+        });
         if (error) throw new Error(`claim_link failed: ${error.message}`);
         const row = Array.isArray(data) ? data[0] : data;
         if (!row) return null;
-        return { createdBy: row.inviter_id ?? null, targetUserId: row.target_id ?? null };
+        return {
+          createdBy: row.inviter_id ?? null,
+          targetUserId: row.target_id ?? null,
+        };
       },
       async release(token) {
-        const { error } = await client.from('links').update({ used_at: null }).eq('token', token);
+        const { error } = await client
+          .from("links")
+          .update({ used_at: null })
+          .eq("token", token);
         if (error) throw new Error(`release link failed: ${error.message}`);
       },
       async markUsed(token, userId) {
-        const { error } = await client.from('links').update({ used_by: userId }).eq('token', token);
+        const { error } = await client
+          .from("links")
+          .update({ used_by: userId })
+          .eq("token", token);
         if (error) throw new Error(`mark link used failed: ${error.message}`);
       },
       async inviteInfo(token) {
         const { data, error } = await client
-          .from('links')
-          .select('created_by')
-          .eq('token', token)
-          .eq('kind', 'invite')
-          .is('used_at', null)
-          .gt('expires_at', new Date().toISOString())
+          .from("links")
+          .select("created_by")
+          .eq("token", token)
+          .eq("kind", "invite")
+          .is("used_at", null)
+          .gt("expires_at", new Date().toISOString())
           .maybeSingle();
         if (error) throw new Error(`invite lookup failed: ${error.message}`);
         if (!data?.created_by) return null;
-        const profile = await client.from('profiles').select('nick').eq('id', data.created_by).maybeSingle();
-        if (profile.error) throw new Error(`inviter lookup failed: ${profile.error.message}`);
-        return profile.data?.nick ? { inviterNick: profile.data.nick as string } : null;
+        const profile = await client
+          .from("profiles")
+          .select("nick")
+          .eq("id", data.created_by)
+          .maybeSingle();
+        if (profile.error)
+          throw new Error(`inviter lookup failed: ${profile.error.message}`);
+        return profile.data?.nick
+          ? { inviterNick: profile.data.nick as string }
+          : null;
       },
     },
     profiles: {
       async getById(id) {
         const { data, error } = await client
-          .from('profiles')
-          .select('id, nick, is_admin, disabled')
-          .eq('id', id)
+          .from("profiles")
+          .select("id, nick, is_admin, disabled")
+          .eq("id", id)
           .maybeSingle();
         if (error) throw new Error(`profile lookup failed: ${error.message}`);
         return data ?? null;
       },
       async nickExists(nickNormalized) {
         const { data, error } = await client
-          .from('profiles')
-          .select('id')
-          .eq('nick_normalized', nickNormalized)
+          .from("profiles")
+          .select("id")
+          .eq("nick_normalized", nickNormalized)
           .limit(1);
         if (error) throw new Error(`nick lookup failed: ${error.message}`);
         return (data?.length ?? 0) > 0;
       },
       async setDisabled(id, disabled) {
-        const { error } = await client.from('profiles').update({ disabled }).eq('id', id);
+        const { error } = await client
+          .from("profiles")
+          .update({ disabled })
+          .eq("id", id);
         if (error) throw new Error(`set disabled failed: ${error.message}`);
       },
     },
@@ -83,13 +107,17 @@ export function createPorts(client: SupabaseClient = getAdminClient()): Ports {
           user_metadata: { nick, invited_by: invitedBy },
         });
         if (error || !data.user) {
-          const exists = error?.code === 'email_exists' || error?.code === 'user_already_exists';
-          return { ok: false, reason: exists ? 'exists' : 'other' };
+          const exists =
+            error?.code === "email_exists" ||
+            error?.code === "user_already_exists";
+          return { ok: false, reason: exists ? "exists" : "other" };
         }
         return { ok: true, userId: data.user.id };
       },
       async updatePassword(userId, password) {
-        const { error } = await client.auth.admin.updateUserById(userId, { password });
+        const { error } = await client.auth.admin.updateUserById(userId, {
+          password,
+        });
         if (error) throw new Error(`update password failed: ${error.message}`);
       },
       async verifyJwt(jwt) {
@@ -103,28 +131,31 @@ export function createPorts(client: SupabaseClient = getAdminClient()): Ports {
       },
       async setBanned(userId, banned) {
         const { error } = await client.auth.admin.updateUserById(userId, {
-          ban_duration: banned ? BAN_FOREVER : 'none',
+          ban_duration: banned ? BAN_FOREVER : "none",
         });
         if (error) throw new Error(`set ban failed: ${error.message}`);
       },
       async revokeSessions(userId) {
-        const { error } = await client.rpc('revoke_sessions', { p_user: userId });
+        const { error } = await client.rpc("revoke_sessions", {
+          p_user: userId,
+        });
         if (error) throw new Error(`revoke sessions failed: ${error.message}`);
       },
     },
     resetRequests: {
       async create(nick, inviterNick) {
-        const { data, error } = await client.rpc('create_reset_request', {
+        const { data, error } = await client.rpc("create_reset_request", {
           p_nick: nick,
           p_inviter_nick: inviterNick,
         });
-        if (error) throw new Error(`create_reset_request failed: ${error.message}`);
-        return data === 'rate_limited' ? 'rate_limited' : 'ok';
+        if (error)
+          throw new Error(`create_reset_request failed: ${error.message}`);
+        return data === "rate_limited" ? "rate_limited" : "ok";
       },
     },
     health: {
       async ping() {
-        const { error } = await client.from('profiles').select('id').limit(1);
+        const { error } = await client.from("profiles").select("id").limit(1);
         if (error) throw new Error(`keepalive read failed: ${error.message}`);
       },
     },

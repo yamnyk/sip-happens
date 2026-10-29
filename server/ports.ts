@@ -1,4 +1,4 @@
-import type { LinkKind } from '../src/types/domain.js';
+import type { LinkKind } from "../src/types/domain.js";
 
 /**
  * Narrow persistence/auth surface the handlers depend on.
@@ -19,7 +19,8 @@ export interface ProfileRow {
   disabled: boolean;
 }
 
-export type CreateUserResult = { ok: true; userId: string } | { ok: false; reason: 'exists' | 'other' };
+export type CreateUserResult =
+  { ok: true; userId: string } | { ok: false; reason: "exists" | "other" };
 
 export interface Ports {
   links: {
@@ -37,7 +38,12 @@ export interface Ports {
     setDisabled(id: string, disabled: boolean): Promise<void>;
   };
   auth: {
-    createUser(input: { email: string; password: string; nick: string; invitedBy: string | null }): Promise<CreateUserResult>;
+    createUser(input: {
+      email: string;
+      password: string;
+      nick: string;
+      invitedBy: string | null;
+    }): Promise<CreateUserResult>;
     updatePassword(userId: string, password: string): Promise<void>;
     /** Verifies an access token; returns the user id or null. */
     verifyJwt(jwt: string): Promise<string | null>;
@@ -47,7 +53,7 @@ export interface Ports {
     revokeSessions(userId: string): Promise<void>;
   };
   resetRequests: {
-    create(nick: string, inviterNick: string): Promise<'ok' | 'rate_limited'>;
+    create(nick: string, inviterNick: string): Promise<"ok" | "rate_limited">;
   };
   health: {
     /** A real read against the database. */

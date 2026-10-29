@@ -1,19 +1,34 @@
-import { useMemo, useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { criteriaFor, groupOf } from '../../config/criteria';
-import { authorScore, drinkStats } from '../../lib/score';
-import { supabase } from '../../lib/supabase';
-import { queryKeys, useDrinks, useProfiles, useReviews } from '../../data/queries';
-import { useSession } from '../../app/session';
-import { drinkTypeLabel } from '../../lib/subtype';
-import { strings, subtypeStrings, typeLabels } from '../../strings';
-import { SubtypePicker } from '../subtypes/SubtypePicker';
-import { EMPTY_SUBTYPE, hasSubtype, useEnsureSubtype, type SubtypeValue } from '../subtypes/useEnsureSubtype';
-import { useSubtypesById } from '../subtypes/useSubtypesById';
-import { DRINK_TYPES, type Drink, type DrinkType, type Scores } from '../../types/domain';
-import { browseStrings as t } from './strings';
-import { ScoreBadge } from './ScoreBadge';
+import { useMemo, useState } from "react";
+import { Link, useNavigate, useParams } from "react-router";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { criteriaFor, groupOf } from "../../config/criteria";
+import { authorScore, drinkStats } from "../../lib/score";
+import { supabase } from "../../lib/supabase";
+import {
+  queryKeys,
+  useDrinks,
+  useProfiles,
+  useReviews,
+} from "../../data/queries";
+import { useSession } from "../../app/session";
+import { drinkTypeLabel } from "../../lib/subtype";
+import { strings, subtypeStrings, typeLabels } from "../../strings";
+import { SubtypePicker } from "../subtypes/SubtypePicker";
+import {
+  EMPTY_SUBTYPE,
+  hasSubtype,
+  useEnsureSubtype,
+  type SubtypeValue,
+} from "../subtypes/useEnsureSubtype";
+import { useSubtypesById } from "../subtypes/useSubtypesById";
+import {
+  DRINK_TYPES,
+  type Drink,
+  type DrinkType,
+  type Scores,
+} from "../../types/domain";
+import { browseStrings as t } from "./strings";
+import { ScoreBadge } from "./ScoreBadge";
 
 function StageBlock({
   label,
@@ -29,33 +44,55 @@ function StageBlock({
   if (!scores && !note) return null;
   return (
     <div className="flex flex-col gap-2 rounded-lg bg-neutral-950/60 p-3">
-      <p className="text-xs uppercase tracking-wide text-neutral-500">{label}</p>
+      <p className="text-xs tracking-wide text-neutral-500 uppercase">
+        {label}
+      </p>
       {scores && (
         <ul className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
           {criteriaFor(type).map((c) => (
-            <li key={c.key} className="flex items-baseline justify-between gap-2">
+            <li
+              key={c.key}
+              className="flex items-baseline justify-between gap-2"
+            >
               <span className="text-neutral-400">{c.label}</span>
-              <span className="font-medium tabular-nums">{scores[c.key] ?? '-'}</span>
+              <span className="font-medium tabular-nums">
+                {scores[c.key] ?? "-"}
+              </span>
             </li>
           ))}
         </ul>
       )}
-      {note && <p className="whitespace-pre-wrap text-sm text-neutral-200">{note}</p>}
+      {note && (
+        <p className="text-sm whitespace-pre-wrap text-neutral-200">{note}</p>
+      )}
     </div>
   );
 }
 
-function EditForm({ drink, hasReviews, onDone }: { drink: Drink; hasReviews: boolean; onDone: () => void }) {
+function EditForm({
+  drink,
+  hasReviews,
+  onDone,
+}: {
+  drink: Drink;
+  hasReviews: boolean;
+  onDone: () => void;
+}) {
   const queryClient = useQueryClient();
   const [name, setName] = useState(drink.name);
   const [type, setType] = useState<DrinkType>(drink.type);
   const [error, setError] = useState<string | null>(null);
-  const [subtype, setSubtype] = useState<SubtypeValue>({ subtypeId: drink.subtype_id, newName: null });
+  const [subtype, setSubtype] = useState<SubtypeValue>({
+    subtypeId: drink.subtype_id,
+    newName: null,
+  });
   const [subtypeRequired, setSubtypeRequired] = useState(false);
   const [subtypeNotice, setSubtypeNotice] = useState<string | null>(null);
   const ensureSubtype = useEnsureSubtype();
 
-  const allowed = DRINK_TYPES.filter((ty) => !hasReviews || groupOf(ty) === groupOf(drink.type));
+  const allowed = DRINK_TYPES.filter(
+    (ty) => !hasReviews || groupOf(ty) === groupOf(drink.type),
+  );
 
   function changeSubtype(next: SubtypeValue) {
     setSubtype(next);
@@ -68,13 +105,13 @@ function EditForm({ drink, hasReviews, onDone }: { drink: Drink; hasReviews: boo
       const trimmed = name.trim();
       if (!trimmed) throw new Error(t.drink.nameRequired);
       let subtypeId: string | null = null;
-      if (type === 'other') {
+      if (type === "other") {
         if (!hasSubtype(subtype)) {
           setSubtypeRequired(true);
           return false;
         }
         const ensured = await ensureSubtype(subtype);
-        if ('duplicateOf' in ensured) {
+        if ("duplicateOf" in ensured) {
           setSubtype({ subtypeId: ensured.duplicateOf.id, newName: null });
           setSubtypeNotice(subtypeStrings.duplicate(ensured.duplicateOf.name));
           return false;
@@ -83,13 +120,13 @@ function EditForm({ drink, hasReviews, onDone }: { drink: Drink; hasReviews: boo
         setSubtype({ subtypeId, newName: null });
       }
       const { data, error: err } = await supabase
-        .from('drinks')
+        .from("drinks")
         .update({ name: trimmed, type, subtype_id: subtypeId })
-        .eq('id', drink.id)
-        .select('id');
+        .eq("id", drink.id)
+        .select("id");
       if (err) throw err;
       // RLS denies silently (0 rows) once someone else has reviewed the drink.
-      if (!data?.length) throw new Error('drink_not_updated');
+      if (!data?.length) throw new Error("drink_not_updated");
       return true;
     },
     onSuccess: async (saved) => {
@@ -97,7 +134,12 @@ function EditForm({ drink, hasReviews, onDone }: { drink: Drink; hasReviews: boo
       await queryClient.invalidateQueries({ queryKey: queryKeys.drinks });
       onDone();
     },
-    onError: (e: unknown) => setError(e instanceof Error && e.message === t.drink.nameRequired ? e.message : t.drink.saveError),
+    onError: (e: unknown) =>
+      setError(
+        e instanceof Error && e.message === t.drink.nameRequired
+          ? e.message
+          : t.drink.saveError,
+      ),
   });
 
   return (
@@ -127,21 +169,30 @@ function EditForm({ drink, hasReviews, onDone }: { drink: Drink; hasReviews: boo
               type="button"
               onClick={() => {
                 setType(ty);
-                if (ty !== 'other') changeSubtype(EMPTY_SUBTYPE);
+                if (ty !== "other") changeSubtype(EMPTY_SUBTYPE);
               }}
               aria-pressed={type === ty}
               className={`min-h-11 rounded-full px-4 text-sm ${
-                type === ty ? 'bg-amber-400 font-medium text-neutral-950' : 'bg-neutral-950 text-neutral-300'
+                type === ty
+                  ? "bg-amber-400 font-medium text-neutral-950"
+                  : "bg-neutral-950 text-neutral-300"
               }`}
             >
               {typeLabels[ty]}
             </button>
           ))}
         </div>
-        {hasReviews && <p className="text-xs text-neutral-500">{t.drink.typeLimited}</p>}
+        {hasReviews && (
+          <p className="text-xs text-neutral-500">{t.drink.typeLimited}</p>
+        )}
       </div>
-      {type === 'other' && (
-        <SubtypePicker value={subtype} onChange={changeSubtype} showRequired={subtypeRequired} notice={subtypeNotice} />
+      {type === "other" && (
+        <SubtypePicker
+          value={subtype}
+          onChange={changeSubtype}
+          showRequired={subtypeRequired}
+          notice={subtypeNotice}
+        />
       )}
       {error && <p className="text-sm text-rose-300">{error}</p>}
       <div className="flex gap-2">
@@ -152,7 +203,11 @@ function EditForm({ drink, hasReviews, onDone }: { drink: Drink; hasReviews: boo
         >
           {strings.common.save}
         </button>
-        <button type="button" onClick={onDone} className="min-h-11 flex-1 rounded-lg bg-neutral-800 text-neutral-200">
+        <button
+          type="button"
+          onClick={onDone}
+          className="min-h-11 flex-1 rounded-lg bg-neutral-800 text-neutral-200"
+        >
           {strings.common.cancel}
         </button>
       </div>
@@ -180,23 +235,31 @@ export default function DrinkPage() {
     const group = groupOf(drink.type);
     return (reviews.data ?? [])
       .filter((r) => r.drink_id === drink.id)
-      .map((r) => ({ review: r, nick: nicks.get(r.author_id) ?? '?', score: authorScore(group, r) }))
+      .map((r) => ({
+        review: r,
+        nick: nicks.get(r.author_id) ?? "?",
+        score: authorScore(group, r),
+      }))
       .sort((a, b) => (b.score ?? -1) - (a.score ?? -1));
   }, [drink, reviews.data, profiles.data]);
 
   const del = useMutation({
     mutationFn: async () => {
-      const { data, error } = await supabase.from('drinks').delete().eq('id', id!).select('id');
+      const { data, error } = await supabase
+        .from("drinks")
+        .delete()
+        .eq("id", id!)
+        .select("id");
       if (error) throw error;
       // RLS denies silently (0 rows) once someone else has reviewed the drink.
-      if (!data?.length) throw new Error('drink_not_deleted');
+      if (!data?.length) throw new Error("drink_not_deleted");
     },
     onSuccess: async () => {
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: queryKeys.drinks }),
         queryClient.invalidateQueries({ queryKey: queryKeys.reviews }),
       ]);
-      navigate('/', { replace: true });
+      navigate("/", { replace: true });
     },
     onError: () => setDeleteError(true),
   });
@@ -205,7 +268,8 @@ export default function DrinkPage() {
     return <p className="py-4 text-neutral-400">{strings.common.loading}</p>;
   if (drinks.isError || reviews.isError || profiles.isError)
     return <p className="py-4 text-rose-300">{strings.common.error}</p>;
-  if (!drink) return <p className="py-4 text-neutral-400">{t.drink.notFound}</p>;
+  if (!drink)
+    return <p className="py-4 text-neutral-400">{t.drink.notFound}</p>;
 
   const stats = drinkStats(
     groupOf(drink.type),
@@ -213,7 +277,8 @@ export default function DrinkPage() {
   );
   const mine = rows.find((r) => r.review.author_id === profile?.id);
   const isAdmin = Boolean(profile?.is_admin);
-  const canEdit = isAdmin || (profile !== null && drink.created_by === profile.id);
+  const canEdit =
+    isAdmin || (profile !== null && drink.created_by === profile.id);
 
   return (
     <div className="flex flex-col gap-5 py-2">
@@ -221,7 +286,8 @@ export default function DrinkPage() {
         <div className="min-w-0">
           <h1 className="text-xl font-semibold">{drink.name}</h1>
           <p className="text-sm text-neutral-400">
-            {drinkTypeLabel(drink, subtypesById)} · {t.people.reviewsCount(stats.count)}
+            {drinkTypeLabel(drink, subtypesById)} ·{" "}
+            {t.people.reviewsCount(stats.count)}
           </p>
         </div>
         <div className="flex shrink-0 flex-col items-center gap-1">
@@ -242,7 +308,10 @@ export default function DrinkPage() {
           <h2 className="text-sm text-neutral-400">{t.drink.spread}</h2>
           <ul className="flex flex-wrap gap-2">
             {rows.map(({ review, nick, score }) => (
-              <li key={review.id} className="flex items-center gap-2 rounded-lg bg-neutral-900 py-1 pl-3 pr-1">
+              <li
+                key={review.id}
+                className="flex items-center gap-2 rounded-lg bg-neutral-900 py-1 pr-1 pl-3"
+              >
                 <span className="max-w-28 truncate text-sm">{nick}</span>
                 <ScoreBadge score={score} size="sm" />
               </li>
@@ -256,9 +325,15 @@ export default function DrinkPage() {
       ) : (
         <ul className="flex flex-col gap-3">
           {rows.map(({ review, nick, score }) => (
-            <li key={review.id} className="flex flex-col gap-3 rounded-xl bg-neutral-900 p-4">
+            <li
+              key={review.id}
+              className="flex flex-col gap-3 rounded-xl bg-neutral-900 p-4"
+            >
               <div className="flex items-center justify-between gap-3">
-                <Link to={`/people/${review.author_id}`} className="flex min-h-11 items-center font-medium text-amber-400">
+                <Link
+                  to={`/people/${review.author_id}`}
+                  className="flex min-h-11 items-center font-medium text-amber-400"
+                >
                   {nick}
                 </Link>
                 <ScoreBadge score={score} />
@@ -283,7 +358,11 @@ export default function DrinkPage() {
       {canEdit && (
         <section className="flex flex-col gap-3 border-t border-neutral-800 pt-4">
           {editing ? (
-            <EditForm drink={drink} hasReviews={rows.length > 0} onDone={() => setEditing(false)} />
+            <EditForm
+              drink={drink}
+              hasReviews={rows.length > 0}
+              onDone={() => setEditing(false)}
+            />
           ) : (
             <button
               type="button"
@@ -306,7 +385,9 @@ export default function DrinkPage() {
               >
                 {t.drink.deleteDrink}
               </button>
-              {deleteError && <p className="text-sm text-rose-300">{strings.common.error}</p>}
+              {deleteError && (
+                <p className="text-sm text-rose-300">{strings.common.error}</p>
+              )}
             </>
           )}
         </section>

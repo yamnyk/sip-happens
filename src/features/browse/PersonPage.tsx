@@ -1,14 +1,14 @@
-import { useMemo } from 'react';
-import { Link, useParams } from 'react-router';
-import { groupOf } from '../../config/criteria';
-import { authorScore } from '../../lib/score';
-import { useDrinks, useProfiles, useReviews } from '../../data/queries';
-import { drinkTypeLabel } from '../../lib/subtype';
-import { strings } from '../../strings';
-import { DRINK_TYPES } from '../../types/domain';
-import { useSubtypesById } from '../subtypes/useSubtypesById';
-import { browseStrings as t } from './strings';
-import { ScoreBadge } from './ScoreBadge';
+import { useMemo } from "react";
+import { Link, useParams } from "react-router";
+import { groupOf } from "../../config/criteria";
+import { authorScore } from "../../lib/score";
+import { useDrinks, useProfiles, useReviews } from "../../data/queries";
+import { drinkTypeLabel } from "../../lib/subtype";
+import { strings } from "../../strings";
+import { DRINK_TYPES } from "../../types/domain";
+import { useSubtypesById } from "../subtypes/useSubtypesById";
+import { browseStrings as t } from "./strings";
+import { ScoreBadge } from "./ScoreBadge";
 
 export default function PersonPage() {
   const { id } = useParams<{ id: string }>();
@@ -23,13 +23,18 @@ export default function PersonPage() {
       .filter((r) => r.author_id === id)
       .flatMap((r) => {
         const drink = drinkMap.get(r.drink_id);
-        return drink ? [{ review: r, drink, score: authorScore(groupOf(drink.type), r) }] : [];
+        return drink
+          ? [{ review: r, drink, score: authorScore(groupOf(drink.type), r) }]
+          : [];
       });
     // Group by displayed type: fixed types in their usual order, custom 'other' subtypes after, alphabetically.
-    const sums = new Map<string, { label: string; order: number; sum: number; n: number }>();
+    const sums = new Map<
+      string,
+      { label: string; order: number; sum: number; n: number }
+    >();
     for (const m of mine) {
       if (m.score === null) continue;
-      const custom = m.drink.type === 'other' && m.drink.subtype_id;
+      const custom = m.drink.type === "other" && m.drink.subtype_id;
       const key = custom ? `s:${m.drink.subtype_id}` : m.drink.type;
       const cur = sums.get(key) ?? {
         label: drinkTypeLabel(m.drink, subtypesById),
@@ -42,8 +47,16 @@ export default function PersonPage() {
       sums.set(key, cur);
     }
     const perType = [...sums.entries()]
-      .map(([key, v]) => ({ key, label: v.label, order: v.order, avg: Math.round((v.sum / v.n) * 10) / 10, n: v.n }))
-      .sort((a, b) => a.order - b.order || a.label.localeCompare(b.label, 'uk'));
+      .map(([key, v]) => ({
+        key,
+        label: v.label,
+        order: v.order,
+        avg: Math.round((v.sum / v.n) * 10) / 10,
+        n: v.n,
+      }))
+      .sort(
+        (a, b) => a.order - b.order || a.label.localeCompare(b.label, "uk"),
+      );
     return { mine, perType };
   }, [drinks.data, reviews.data, id, subtypesById]);
 
@@ -53,7 +66,8 @@ export default function PersonPage() {
     return <p className="py-4 text-rose-300">{strings.common.error}</p>;
 
   const person = profiles.data?.find((p) => p.id === id);
-  if (!person) return <p className="py-4 text-neutral-400">{t.people.notFound}</p>;
+  if (!person)
+    return <p className="py-4 text-neutral-400">{t.people.notFound}</p>;
 
   return (
     <div className="flex flex-col gap-5 py-2">
@@ -64,7 +78,10 @@ export default function PersonPage() {
           <h2 className="text-sm text-neutral-400">{t.people.byType}</h2>
           <ul className="grid grid-cols-2 gap-2">
             {data.perType.map((p) => (
-              <li key={p.key} className="flex items-center justify-between rounded-xl bg-neutral-900 px-3 py-3">
+              <li
+                key={p.key}
+                className="flex items-center justify-between rounded-xl bg-neutral-900 px-3 py-3"
+              >
                 <span>
                   {p.label}
                   <span className="ml-1 text-xs text-neutral-500">({p.n})</span>
@@ -90,7 +107,9 @@ export default function PersonPage() {
                 >
                   <div className="min-w-0">
                     <p className="truncate font-medium">{drink.name}</p>
-                    <p className="text-sm text-neutral-400">{drinkTypeLabel(drink, subtypesById)}</p>
+                    <p className="text-sm text-neutral-400">
+                      {drinkTypeLabel(drink, subtypesById)}
+                    </p>
                   </div>
                   <ScoreBadge score={score} />
                 </Link>

@@ -1,22 +1,25 @@
-import { useEffect, useState, type FormEvent } from 'react';
-import { Link, useNavigate, useParams } from 'react-router';
-import { useSession } from '../../app/session';
-import { validateNick } from '../../lib/nick';
-import { apiErrors, nickErrors } from '../../strings';
-import { checkPassword } from '../../lib/schemas';
-import { callApi } from './api';
-import { authStrings } from './strings';
-import { errCls, inputCls, linkCls, primaryBtnCls } from './ui';
+import { useEffect, useState, type FormEvent } from "react";
+import { Link, useNavigate, useParams } from "react-router";
+import { useSession } from "../../app/session";
+import { validateNick } from "../../lib/nick";
+import { apiErrors, nickErrors } from "../../strings";
+import { checkPassword } from "../../lib/schemas";
+import { callApi } from "./api";
+import { authStrings } from "./strings";
+import { errCls, inputCls, linkCls, primaryBtnCls } from "./ui";
 
-type Status = { state: 'loading' } | { state: 'dead'; message: string } | { state: 'valid'; inviterNick: string };
+type Status =
+  | { state: "loading" }
+  | { state: "dead"; message: string }
+  | { state: "valid"; inviterNick: string };
 
 export default function JoinPage() {
-  const { token = '' } = useParams();
+  const { token = "" } = useParams();
   const { signIn } = useSession();
   const navigate = useNavigate();
-  const [status, setStatus] = useState<Status>({ state: 'loading' });
-  const [nick, setNick] = useState('');
-  const [password, setPassword] = useState('');
+  const [status, setStatus] = useState<Status>({ state: "loading" });
+  const [nick, setNick] = useState("");
+  const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const s = authStrings.join;
@@ -28,11 +31,17 @@ export default function JoinPage() {
     ).then((res) => {
       if (cancelled) return;
       if (!res.ok) {
-        setStatus({ state: 'dead', message: apiErrors[res.error === 'server_error' ? 'server_error' : 'invalid_token'] });
+        setStatus({
+          state: "dead",
+          message:
+            apiErrors[
+              res.error === "server_error" ? "server_error" : "invalid_token"
+            ],
+        });
       } else if (!res.valid) {
-        setStatus({ state: 'dead', message: apiErrors.invalid_token });
+        setStatus({ state: "dead", message: apiErrors.invalid_token });
       } else {
-        setStatus({ state: 'valid', inviterNick: res.inviterNick ?? '' });
+        setStatus({ state: "valid", inviterNick: res.inviterNick ?? "" });
       }
     });
     return () => {
@@ -45,28 +54,32 @@ export default function JoinPage() {
     const nickErr = validateNick(nick);
     if (nickErr) return setError(nickErrors[nickErr]);
     const passwordErr = checkPassword(password);
-    if (passwordErr) return setError(passwordErr === 'password_too_short' ? s.passwordShort : s.passwordLong);
+    if (passwordErr)
+      return setError(
+        passwordErr === "password_too_short" ? s.passwordShort : s.passwordLong,
+      );
     setBusy(true);
     setError(null);
-    const res = await callApi('/api/register', { token, nick, password });
+    const res = await callApi("/api/register", { token, nick, password });
     if (!res.ok) {
       setBusy(false);
-      if (res.error === 'invalid_token') setStatus({ state: 'dead', message: apiErrors.invalid_token });
+      if (res.error === "invalid_token")
+        setStatus({ state: "dead", message: apiErrors.invalid_token });
       else setError(apiErrors[res.error]);
       return;
     }
     try {
       await signIn(nick, password);
-      navigate('/', { replace: true });
+      navigate("/", { replace: true });
     } catch {
-      navigate('/login', { replace: true });
+      navigate("/login", { replace: true });
     }
   }
 
   return (
     <div className="mx-auto flex min-h-screen max-w-sm flex-col justify-center gap-4 px-4 py-8">
-      {status.state === 'loading' && <p className="text-neutral-400">...</p>}
-      {status.state === 'dead' && (
+      {status.state === "loading" && <p className="text-neutral-400">...</p>}
+      {status.state === "dead" && (
         <>
           <p className="text-neutral-200">{status.message}</p>
           <Link to="/login" className={linkCls}>
@@ -74,10 +87,12 @@ export default function JoinPage() {
           </Link>
         </>
       )}
-      {status.state === 'valid' && (
+      {status.state === "valid" && (
         <>
           <h1 className="text-2xl font-semibold">{s.title}</h1>
-          {status.inviterNick && <p className="text-amber-400">{s.invitedBy(status.inviterNick)}</p>}
+          {status.inviterNick && (
+            <p className="text-amber-400">{s.invitedBy(status.inviterNick)}</p>
+          )}
           <form onSubmit={onSubmit} className="flex flex-col gap-3">
             <input
               className={inputCls}
@@ -98,7 +113,11 @@ export default function JoinPage() {
               onChange={(e) => setPassword(e.target.value)}
             />
             {error && <p className={errCls}>{error}</p>}
-            <button type="submit" className={primaryBtnCls} disabled={busy || !nick || !password}>
+            <button
+              type="submit"
+              className={primaryBtnCls}
+              disabled={busy || !nick || !password}
+            >
               {busy ? s.submitting : s.submit}
             </button>
           </form>

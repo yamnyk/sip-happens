@@ -1,5 +1,5 @@
-import { createHash, timingSafeEqual } from 'node:crypto';
-import type { ApiErrorCode, ApiResult } from '../../src/lib/schemas.js';
+import { createHash, timingSafeEqual } from "node:crypto";
+import type { ApiErrorCode, ApiResult } from "../../src/lib/schemas.js";
 
 export interface HandlerResult<T extends object = object> {
   status: number;
@@ -16,7 +16,9 @@ const ERROR_STATUS: Record<ApiErrorCode, number> = {
   server_error: 500,
 };
 
-export function fail<T extends object = object>(error: ApiErrorCode): HandlerResult<T> {
+export function fail<T extends object = object>(
+  error: ApiErrorCode,
+): HandlerResult<T> {
   return { status: ERROR_STATUS[error], body: { ok: false, error } };
 }
 
@@ -33,7 +35,7 @@ export function parseBearer(header: string | null | undefined): string | null {
 
 /** Constant-time string comparison (hashes first so lengths do not leak). */
 export function safeEqual(a: string, b: string): boolean {
-  const ha = createHash('sha256').update(a).digest();
-  const hb = createHash('sha256').update(b).digest();
+  const ha = createHash("sha256").update(a).digest();
+  const hb = createHash("sha256").update(b).digest();
   return timingSafeEqual(ha, hb);
 }

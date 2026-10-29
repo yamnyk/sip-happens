@@ -1,15 +1,15 @@
-import { useState, type FormEvent } from 'react';
-import { Link, useNavigate, useParams } from 'react-router';
-import { apiErrors } from '../../strings';
-import { checkPassword } from '../../lib/schemas';
-import { callApi } from './api';
-import { authStrings } from './strings';
-import { errCls, inputCls, linkCls, primaryBtnCls } from './ui';
+import { useState, type FormEvent } from "react";
+import { Link, useNavigate, useParams } from "react-router";
+import { apiErrors } from "../../strings";
+import { checkPassword } from "../../lib/schemas";
+import { callApi } from "./api";
+import { authStrings } from "./strings";
+import { errCls, inputCls, linkCls, primaryBtnCls } from "./ui";
 
 export default function ResetPage() {
-  const { token = '' } = useParams();
+  const { token = "" } = useParams();
   const navigate = useNavigate();
-  const [password, setPassword] = useState('');
+  const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [dead, setDead] = useState(false);
@@ -18,13 +18,18 @@ export default function ResetPage() {
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
     const passwordErr = checkPassword(password);
-    if (passwordErr) return setError(passwordErr === 'password_too_short' ? authStrings.join.passwordShort : authStrings.join.passwordLong);
+    if (passwordErr)
+      return setError(
+        passwordErr === "password_too_short"
+          ? authStrings.join.passwordShort
+          : authStrings.join.passwordLong,
+      );
     setBusy(true);
     setError(null);
-    const res = await callApi('/api/reset-complete', { token, password });
+    const res = await callApi("/api/reset-complete", { token, password });
     setBusy(false);
-    if (res.ok) return navigate('/login', { replace: true });
-    if (res.error === 'invalid_token') setDead(true);
+    if (res.ok) return navigate("/login", { replace: true });
+    if (res.error === "invalid_token") setDead(true);
     else setError(apiErrors[res.error]);
   }
 
@@ -51,7 +56,11 @@ export default function ResetPage() {
               onChange={(e) => setPassword(e.target.value)}
             />
             {error && <p className={errCls}>{error}</p>}
-            <button type="submit" className={primaryBtnCls} disabled={busy || !password}>
+            <button
+              type="submit"
+              className={primaryBtnCls}
+              disabled={busy || !password}
+            >
               {busy ? s.submitting : s.submit}
             </button>
           </form>

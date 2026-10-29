@@ -1,11 +1,11 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '../../lib/supabase';
-import type { ApiErrorCode, ApiResult } from '../../lib/schemas';
-import { queryKeys } from '../../data/queries';
-import type { ResetRequest } from '../../types/domain';
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "../../lib/supabase";
+import type { ApiErrorCode, ApiResult } from "../../lib/schemas";
+import { queryKeys } from "../../data/queries";
+import type { ResetRequest } from "../../types/domain";
 
 const adminKeys = {
-  resetRequests: ['admin', 'reset_requests'],
+  resetRequests: ["admin", "reset_requests"],
 } as const;
 
 export function useResetRequests() {
@@ -13,9 +13,9 @@ export function useResetRequests() {
     queryKey: adminKeys.resetRequests,
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('reset_requests')
-        .select('*')
-        .order('created_at', { ascending: false });
+        .from("reset_requests")
+        .select("*")
+        .order("created_at", { ascending: false });
       if (error) throw error;
       return data as ResetRequest[];
     },
@@ -28,20 +28,21 @@ export function useResolveReset(adminId: string) {
   return useMutation({
     mutationFn: async (userId: string) => {
       const { data, error } = await supabase
-        .from('links')
-        .insert({ kind: 'reset', target_user_id: userId })
-        .select('token')
+        .from("links")
+        .insert({ kind: "reset", target_user_id: userId })
+        .select("token")
         .single();
       if (error) throw error;
       const { error: updateError } = await supabase
-        .from('reset_requests')
+        .from("reset_requests")
         .update({ resolved_at: new Date().toISOString(), resolved_by: adminId })
-        .eq('user_id', userId)
-        .is('resolved_at', null);
+        .eq("user_id", userId)
+        .is("resolved_at", null);
       if (updateError) throw updateError;
       return (data as { token: string }).token;
     },
-    onSettled: () => queryClient.invalidateQueries({ queryKey: adminKeys.resetRequests }),
+    onSettled: () =>
+      queryClient.invalidateQueries({ queryKey: adminKeys.resetRequests }),
   });
 }
 
@@ -51,12 +52,13 @@ export function useDismissRequest(adminId: string) {
   return useMutation({
     mutationFn: async (requestId: string) => {
       const { error } = await supabase
-        .from('reset_requests')
+        .from("reset_requests")
         .update({ resolved_at: new Date().toISOString(), resolved_by: adminId })
-        .eq('id', requestId);
+        .eq("id", requestId);
       if (error) throw error;
     },
-    onSettled: () => queryClient.invalidateQueries({ queryKey: adminKeys.resetRequests }),
+    onSettled: () =>
+      queryClient.invalidateQueries({ queryKey: adminKeys.resetRequests }),
   });
 }
 
@@ -68,7 +70,7 @@ export class AdminApiError extends Error {
   }
 }
 
-type AdminUserAction = 'delete' | 'ban' | 'unban';
+type AdminUserAction = "delete" | "ban" | "unban";
 
 export function useAdminUserAction() {
   const queryClient = useQueryClient();
@@ -76,17 +78,20 @@ export function useAdminUserAction() {
     mutationFn: async (vars: { userId: string; action: AdminUserAction }) => {
       const { data } = await supabase.auth.getSession();
       const token = data.session?.access_token;
-      if (!token) throw new AdminApiError('unauthorized');
+      if (!token) throw new AdminApiError("unauthorized");
       let result: ApiResult;
       try {
-        const res = await fetch('/api/admin-user', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        const res = await fetch("/api/admin-user", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
           body: JSON.stringify(vars),
         });
         result = (await res.json()) as ApiResult;
       } catch {
-        throw new AdminApiError('server_error');
+        throw new AdminApiError("server_error");
       }
       if (!result.ok) throw new AdminApiError(result.error);
     },

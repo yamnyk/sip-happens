@@ -1,12 +1,12 @@
-import { useState, type FormEvent } from 'react';
-import { Link } from 'react-router';
-import { callApi } from './api';
-import { authStrings } from './strings';
-import { inputCls, linkCls, primaryBtnCls } from './ui';
+import { useState, type FormEvent } from "react";
+import { Link } from "react-router";
+import { callApi } from "./api";
+import { authStrings } from "./strings";
+import { inputCls, linkCls, primaryBtnCls } from "./ui";
 
 export default function ForgotPage() {
-  const [nick, setNick] = useState('');
-  const [inviterNick, setInviterNick] = useState('');
+  const [nick, setNick] = useState("");
+  const [inviterNick, setInviterNick] = useState("");
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState(false);
   const s = authStrings.forgot;
@@ -15,7 +15,10 @@ export default function ForgotPage() {
     e.preventDefault();
     setBusy(true);
     // Always the same confirmation, whatever the server says: no account enumeration.
-    await callApi('/api/reset-request', { nick: nick.trim(), inviterNick: inviterNick.trim() });
+    await callApi("/api/reset-request", {
+      nick: nick.trim(),
+      inviterNick: inviterNick.trim(),
+    });
     setBusy(false);
     setDone(true);
   }
@@ -45,7 +48,11 @@ export default function ForgotPage() {
               value={inviterNick}
               onChange={(e) => setInviterNick(e.target.value)}
             />
-            <button type="submit" className={primaryBtnCls} disabled={busy || !nick.trim() || !inviterNick.trim()}>
+            <button
+              type="submit"
+              className={primaryBtnCls}
+              disabled={busy || !nick.trim() || !inviterNick.trim()}
+            >
               {busy ? s.submitting : s.submit}
             </button>
           </form>

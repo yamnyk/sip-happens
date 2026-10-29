@@ -1,15 +1,20 @@
-import { useState } from 'react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useSession } from '../../app/session';
-import { useProfiles } from '../../data/queries';
-import { supabase } from '../../lib/supabase';
-import { strings } from '../../strings';
-import type { InviteLink } from '../../types/domain';
-import { inviteStrings as s } from './strings';
+import { useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useSession } from "../../app/session";
+import { useProfiles } from "../../data/queries";
+import { supabase } from "../../lib/supabase";
+import { strings } from "../../strings";
+import type { InviteLink } from "../../types/domain";
+import { inviteStrings as s } from "./strings";
 
-const linksKey = (userId: string | undefined) => ['links', userId] as const;
+const linksKey = (userId: string | undefined) => ["links", userId] as const;
 
-const fmt = (iso: string) => new Date(iso).toLocaleDateString('uk-UA', { day: 'numeric', month: 'short', year: 'numeric' });
+const fmt = (iso: string) =>
+  new Date(iso).toLocaleDateString("uk-UA", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
 const inviteUrl = (token: string) => `${location.origin}/join/${token}`;
 
 export default function InvitesPage() {
@@ -27,11 +32,11 @@ export default function InvitesPage() {
     enabled: Boolean(myId),
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('links')
-        .select('*')
-        .eq('kind', 'invite')
-        .eq('created_by', myId!)
-        .order('created_at', { ascending: false });
+        .from("links")
+        .select("*")
+        .eq("kind", "invite")
+        .eq("created_by", myId!)
+        .order("created_at", { ascending: false });
       if (error) throw error;
       return data as InviteLink[];
     },
@@ -39,7 +44,11 @@ export default function InvitesPage() {
 
   const create = useMutation({
     mutationFn: async () => {
-      const { data, error } = await supabase.from('links').insert({ kind: 'invite' }).select('token').single();
+      const { data, error } = await supabase
+        .from("links")
+        .insert({ kind: "invite" })
+        .select("token")
+        .single();
       if (error) throw error;
       return (data as { token: string }).token;
     },
@@ -60,12 +69,18 @@ export default function InvitesPage() {
     }
   }
 
-  const nickOf = (id: string | null) => profiles.data?.find((p) => p.id === id)?.nick ?? s.usedUnknown;
+  const nickOf = (id: string | null) =>
+    profiles.data?.find((p) => p.id === id)?.nick ?? s.usedUnknown;
 
   function stateText(l: InviteLink): { text: string; tone: string } {
-    if (l.used_at) return { text: s.used(nickOf(l.used_by), fmt(l.used_at)), tone: 'text-emerald-400' };
-    if (new Date(l.expires_at).getTime() <= now) return { text: s.expired(fmt(l.expires_at)), tone: 'text-neutral-500' };
-    return { text: s.active(fmt(l.expires_at)), tone: 'text-amber-400' };
+    if (l.used_at)
+      return {
+        text: s.used(nickOf(l.used_by), fmt(l.used_at)),
+        tone: "text-emerald-400",
+      };
+    if (new Date(l.expires_at).getTime() <= now)
+      return { text: s.expired(fmt(l.expires_at)), tone: "text-neutral-500" };
+    return { text: s.active(fmt(l.expires_at)), tone: "text-amber-400" };
   }
 
   return (
@@ -80,7 +95,9 @@ export default function InvitesPage() {
       >
         {create.isPending ? s.creating : s.create}
       </button>
-      {create.isError && <p className="text-sm text-red-400">{s.createFailed}</p>}
+      {create.isError && (
+        <p className="text-sm text-red-400">{s.createFailed}</p>
+      )}
 
       {fresh && (
         <div className="flex flex-col gap-2 rounded-lg border border-amber-400/50 bg-neutral-900 p-3">
@@ -103,10 +120,18 @@ export default function InvitesPage() {
       )}
 
       <section className="flex flex-col gap-2">
-        <h2 className="text-sm font-medium uppercase tracking-wide text-neutral-400">{s.mine}</h2>
-        {links.isLoading && <p className="text-neutral-400">{strings.common.loading}</p>}
-        {links.isError && <p className="text-sm text-red-400">{s.loadFailed}</p>}
-        {links.data?.length === 0 && <p className="text-neutral-500">{s.none}</p>}
+        <h2 className="text-sm font-medium tracking-wide text-neutral-400 uppercase">
+          {s.mine}
+        </h2>
+        {links.isLoading && (
+          <p className="text-neutral-400">{strings.common.loading}</p>
+        )}
+        {links.isError && (
+          <p className="text-sm text-red-400">{s.loadFailed}</p>
+        )}
+        {links.data?.length === 0 && (
+          <p className="text-neutral-500">{s.none}</p>
+        )}
         <ul className="flex flex-col gap-2">
           {links.data?.map((l) => {
             const st = stateText(l);
@@ -118,7 +143,9 @@ export default function InvitesPage() {
               >
                 <div className="min-w-0">
                   <p className={`text-sm ${st.tone}`}>{st.text}</p>
-                  <p className="truncate text-xs text-neutral-500">{fmt(l.created_at)}</p>
+                  <p className="truncate text-xs text-neutral-500">
+                    {fmt(l.created_at)}
+                  </p>
                 </div>
                 {active && (
                   <button

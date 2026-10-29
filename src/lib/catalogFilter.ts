@@ -1,6 +1,6 @@
-import { CRITERIA, SCORE_MAX, SCORE_MIN } from '../config/criteria';
-import type { DrinkGroup, Review, Scores } from '../types/domain';
-import { isCompleteScores } from './score';
+import { CRITERIA, SCORE_MAX, SCORE_MIN } from "../config/criteria";
+import type { DrinkGroup, Review, Scores } from "../types/domain";
+import { isCompleteScores } from "./score";
 
 /** Per-criterion inclusive [min, max] ranges, keyed `${group}.${criterionKey}`. */
 export type CriterionRanges = Record<string, [number, number]>;
@@ -11,17 +11,13 @@ export function rangeKey(group: DrinkGroup, criterionKey: string): string {
 
 /** Case- and accent-insensitive normal form: NFD, combining marks stripped, lowercase, trimmed. */
 export function fold(s: string): string {
-  return s
-    .normalize('NFD')
-    .replace(/\p{M}/gu, '')
-    .toLowerCase()
-    .trim();
+  return s.normalize("NFD").replace(/\p{M}/gu, "").toLowerCase().trim();
 }
 
 /** Substring match on folded strings. An empty query matches everything. */
 export function matchesQuery(name: string, query: string): boolean {
   const q = fold(query);
-  if (q === '') return true;
+  if (q === "") return true;
   return fold(name).includes(q);
 }
 
@@ -30,15 +26,23 @@ export function matchesQuery(name: string, query: string): boolean {
  * complete for the group, else first_scores when complete, else the review is skipped.
  * Null for a criterion when no review contributed.
  */
-export function criterionAverages(group: DrinkGroup, reviews: readonly Review[]): Record<string, number | null> {
+export function criterionAverages(
+  group: DrinkGroup,
+  reviews: readonly Review[],
+): Record<string, number | null> {
   const used: Scores[] = [];
   for (const r of reviews) {
-    if (isCompleteScores(group, r.final_scores)) used.push(r.final_scores as Scores);
-    else if (isCompleteScores(group, r.first_scores)) used.push(r.first_scores as Scores);
+    if (isCompleteScores(group, r.final_scores))
+      used.push(r.final_scores as Scores);
+    else if (isCompleteScores(group, r.first_scores))
+      used.push(r.first_scores as Scores);
   }
   const out: Record<string, number | null> = {};
   for (const c of CRITERIA[group]) {
-    out[c.key] = used.length === 0 ? null : used.reduce((acc, s) => acc + s[c.key], 0) / used.length;
+    out[c.key] =
+      used.length === 0
+        ? null
+        : used.reduce((acc, s) => acc + s[c.key], 0) / used.length;
   }
   return out;
 }
@@ -78,7 +82,10 @@ export function isRangeActive(range: [number, number]): boolean {
 }
 
 /** Overall rating range for the "all types" view. Inclusive; a drink without a rating fails an active range. */
-export function drinkPassesTotal(average: number | null, range: [number, number]): boolean {
+export function drinkPassesTotal(
+  average: number | null,
+  range: [number, number],
+): boolean {
   if (!isActive(range)) return true;
   return average !== null && average >= range[0] && average <= range[1];
 }

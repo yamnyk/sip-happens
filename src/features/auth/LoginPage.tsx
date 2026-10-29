@@ -1,14 +1,14 @@
-import { useState, type FormEvent } from 'react';
-import { Link, useNavigate } from 'react-router';
-import { useSession } from '../../app/session';
-import { authStrings } from './strings';
-import { errCls, inputCls, linkCls, primaryBtnCls } from './ui';
+import { useState, type FormEvent } from "react";
+import { Link, useNavigate } from "react-router";
+import { useSession } from "../../app/session";
+import { authStrings } from "./strings";
+import { errCls, inputCls, linkCls, primaryBtnCls } from "./ui";
 
 export default function LoginPage() {
   const { signIn } = useSession();
   const navigate = useNavigate();
-  const [nick, setNick] = useState('');
-  const [password, setPassword] = useState('');
+  const [nick, setNick] = useState("");
+  const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
   const [failed, setFailed] = useState(false);
   const s = authStrings.login;
@@ -19,7 +19,7 @@ export default function LoginPage() {
     setFailed(false);
     try {
       await signIn(nick.trim(), password);
-      navigate('/', { replace: true });
+      navigate("/", { replace: true });
     } catch {
       setFailed(true);
     } finally {
@@ -50,7 +50,11 @@ export default function LoginPage() {
           onChange={(e) => setPassword(e.target.value)}
         />
         {failed && <p className={errCls}>{s.failed}</p>}
-        <button type="submit" className={primaryBtnCls} disabled={busy || !nick.trim() || !password}>
+        <button
+          type="submit"
+          className={primaryBtnCls}
+          disabled={busy || !nick.trim() || !password}
+        >
           {busy ? s.submitting : s.submit}
         </button>
       </form>

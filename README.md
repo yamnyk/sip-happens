@@ -14,28 +14,28 @@ A friends-only PWA for logging quick reviews of alcohol (mostly wine, port and g
 
 ## Scripts
 
-| Command | What it does |
-|---|---|
-| `pnpm dev` | Vite dev server |
-| `pnpm build` | Typecheck, then production build into `dist/` |
-| `pnpm typecheck` | `tsc --noEmit` |
-| `pnpm test` | Vitest (pure logic and handler unit tests) |
-| `pnpm lint` | Oxlint |
-| `pnpm format` / `pnpm format:check` | Prettier write / check |
-| `pnpm preview` | Serve the built `dist/` locally |
-| `pnpm bootstrap-admin` | Create the first admin (interactive, hidden password) |
+| Command                             | What it does                                          |
+| ----------------------------------- | ----------------------------------------------------- |
+| `pnpm dev`                          | Vite dev server                                       |
+| `pnpm build`                        | Typecheck, then production build into `dist/`         |
+| `pnpm typecheck`                    | `tsc --noEmit`                                        |
+| `pnpm test`                         | Vitest (pure logic and handler unit tests)            |
+| `pnpm lint`                         | Oxlint                                                |
+| `pnpm format` / `pnpm format:check` | Prettier write / check                                |
+| `pnpm preview`                      | Serve the built `dist/` locally                       |
+| `pnpm bootstrap-admin`              | Create the first admin (interactive, hidden password) |
 
 ## Environment variables
 
 Names match `.env.example` exactly. Values are never committed.
 
-| Name | Where it is set | Client or server | Secret |
-|---|---|---|---|
-| `VITE_SUPABASE_URL` | `.env.local`, Vercel env vars | Client (bundled) and server (reused) | no |
-| `VITE_SUPABASE_PUBLISHABLE_KEY` | `.env.local`, Vercel env vars | Client (bundled) | no |
-| `SUPABASE_SECRET_KEY` | `.env.local`, Vercel env vars | Server only | yes |
-| `CRON_SECRET` | `.env.local`, Vercel env vars | Server only | yes |
-| `SB_DB_PASSWORD` | `.env.local` only, for the local Supabase CLI | Local CLI only | yes |
+| Name                            | Where it is set                               | Client or server                     | Secret |
+| ------------------------------- | --------------------------------------------- | ------------------------------------ | ------ |
+| `VITE_SUPABASE_URL`             | `.env.local`, Vercel env vars                 | Client (bundled) and server (reused) | no     |
+| `VITE_SUPABASE_PUBLISHABLE_KEY` | `.env.local`, Vercel env vars                 | Client (bundled)                     | no     |
+| `SUPABASE_SECRET_KEY`           | `.env.local`, Vercel env vars                 | Server only                          | yes    |
+| `CRON_SECRET`                   | `.env.local`, Vercel env vars                 | Server only                          | yes    |
+| `SB_DB_PASSWORD`                | `.env.local` only, for the local Supabase CLI | Local CLI only                       | yes    |
 
 Rules:
 

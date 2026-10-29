@@ -11,9 +11,12 @@ interface SupabaseEnv {
 }
 
 export function getSupabaseEnv(): SupabaseEnv {
-  return { url: requireEnv('VITE_SUPABASE_URL'), secretKey: requireEnv('SUPABASE_SECRET_KEY') };
+  return {
+    url: requireEnv("VITE_SUPABASE_URL"),
+    secretKey: requireEnv("SUPABASE_SECRET_KEY"),
+  };
 }
 
 export function getCronSecret(): string {
-  return requireEnv('CRON_SECRET');
+  return requireEnv("CRON_SECRET");
 }

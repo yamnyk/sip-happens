@@ -1,9 +1,9 @@
-import { useCallback } from 'react';
-import { useQueryClient } from '@tanstack/react-query';
-import { queryKeys } from '../../data/queries';
-import { findDuplicateSubtype } from '../../lib/subtype';
-import { supabase } from '../../lib/supabase';
-import type { DrinkSubtype } from '../../types/domain';
+import { useCallback } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import { queryKeys } from "../../data/queries";
+import { findDuplicateSubtype } from "../../lib/subtype";
+import { supabase } from "../../lib/supabase";
+import type { DrinkSubtype } from "../../types/domain";
 
 /** Picker value: either an existing subtype, or a not-yet-saved new name. Never both. */
 export interface SubtypeValue {
@@ -13,7 +13,8 @@ export interface SubtypeValue {
 
 export const EMPTY_SUBTYPE: SubtypeValue = { subtypeId: null, newName: null };
 
-export const hasSubtype = (v: SubtypeValue): boolean => Boolean(v.subtypeId) || Boolean(v.newName);
+export const hasSubtype = (v: SubtypeValue): boolean =>
+  Boolean(v.subtypeId) || Boolean(v.newName);
 
 type EnsureSubtypeResult = { id: string } | { duplicateOf: DrinkSubtype };
 
@@ -28,12 +29,17 @@ export function useEnsureSubtype() {
     async (value: SubtypeValue): Promise<EnsureSubtypeResult> => {
       if (value.subtypeId) return { id: value.subtypeId };
       const name = value.newName;
-      if (!name) throw new Error('subtype_required');
-      const { data, error } = await supabase.from('drink_subtypes').insert({ name }).select('id').single();
+      if (!name) throw new Error("subtype_required");
+      const { data, error } = await supabase
+        .from("drink_subtypes")
+        .insert({ name })
+        .select("id")
+        .single();
       if (error) {
-        if ((error as { code?: string }).code === '23505') {
+        if ((error as { code?: string }).code === "23505") {
           await queryClient.refetchQueries({ queryKey: queryKeys.subtypes });
-          const list = queryClient.getQueryData<DrinkSubtype[]>(queryKeys.subtypes) ?? [];
+          const list =
+            queryClient.getQueryData<DrinkSubtype[]>(queryKeys.subtypes) ?? [];
           const duplicateOf = findDuplicateSubtype(name, list);
           if (duplicateOf) return { duplicateOf };
         }
