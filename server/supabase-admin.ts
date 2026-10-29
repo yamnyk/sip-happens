@@ -110,6 +110,13 @@ export function createPorts(client: AdminClient = getAdminClient()): Ports {
           const exists =
             error?.code === "email_exists" ||
             error?.code === "user_already_exists";
+          // Only the code and message: the request body holds the password.
+          if (!exists)
+            console.error(
+              "auth createUser failed:",
+              error?.code,
+              error?.message,
+            );
           return { ok: false, reason: exists ? "exists" : "other" };
         }
         return { ok: true, userId: data.user.id };

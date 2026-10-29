@@ -49,6 +49,7 @@ export async function register(
         (await ports.profiles.nickExists(normalized))
       )
         return fail("nick_taken");
+      console.error("create user failed:", created.reason);
       return fail("server_error");
     }
 

@@ -8,7 +8,7 @@ export async function GET(request: Request): Promise<Response> {
   return guard(async () =>
     keepalive(
       { ports: createPorts(), cronSecret: getCronSecret() },
-      authorization,
+      { authorization },
     ),
   );
 }

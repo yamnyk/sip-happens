@@ -11,12 +11,17 @@ export interface KeepaliveDeps extends Deps {
   cronSecret: string;
 }
 
+export interface KeepaliveInput {
+  /** Raw Authorization header value. */
+  authorization: string | null;
+}
+
 /** Daily cron: requires `Authorization: Bearer ${CRON_SECRET}`, then performs a real DB read. */
 export async function keepalive(
   deps: KeepaliveDeps,
-  authorization: string | null,
+  input: KeepaliveInput,
 ): Promise<HandlerResult> {
-  const presented = parseBearer(authorization);
+  const presented = parseBearer(input.authorization);
   if (!deps.cronSecret || !presented || !safeEqual(presented, deps.cronSecret))
     return fail("unauthorized");
   await deps.ports.health.ping();

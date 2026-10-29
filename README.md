@@ -95,7 +95,7 @@ Rules:
 Before deploy:
 
 - [ ] `pnpm typecheck`, `pnpm test` and `pnpm build` pass.
-- [ ] `supabase/tests/admin_flag.sql` prints `admin_flag: all assertions passed` in the SQL editor.
+- [ ] Every script in `supabase/tests/` prints `<name>: all assertions passed` in the SQL editor.
 - [ ] `.gitignore` covers `.env.local`.
 
 On a Vercel preview:

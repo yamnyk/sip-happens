@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import {
   asPorts,
   fakePorts,
@@ -82,7 +82,10 @@ describe("register", () => {
   it("releases the claim and returns server_error on an unknown createUser failure", async () => {
     const p = fakePorts();
     p.auth.createUser.mockResolvedValue({ ok: false, reason: "other" });
+    const spy = vi.spyOn(console, "error").mockImplementation(() => {});
     const res = await register({ ports: asPorts(p) }, body);
+    expect(spy).toHaveBeenCalledWith("create user failed:", "other");
+    spy.mockRestore();
     expect(res).toEqual({
       status: 500,
       body: { ok: false, error: "server_error" },

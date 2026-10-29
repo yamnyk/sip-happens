@@ -1,5 +1,6 @@
 -- Run in the Supabase SQL editor AFTER applying migrations. Everything rolls back at the end.
--- Success: the script finishes with the notice 'admin_flag: all assertions passed' and no error.
+-- Covers: profiles are read-only to clients, no admin smuggling, links/reset_requests/reviews column locks.
+-- Success: the script finishes with the notice 'profiles_and_admin: all assertions passed' and no error.
 -- Any failed assertion aborts with a message naming the broken guarantee.
 
 begin;
@@ -149,7 +150,7 @@ begin
   ), 'no test profile may be admin after the test';
   assert (select nick from public.profiles where id = '00000000-0000-0000-0000-0000000000a1') = 'tester-one',
     'nick must be unchanged';
-  raise notice 'admin_flag: all assertions passed';
+  raise notice 'profiles_and_admin: all assertions passed';
 end $$;
 
 rollback;

@@ -1,6 +1,7 @@
 import { createHash, timingSafeEqual } from "node:crypto";
 import type { ApiErrorCode, ApiResult } from "../../contract/schemas.js";
 
+/** Handler rule: `(deps, input) => HandlerResult`; `input` is one value: the parsed JSON body for body-only routes, else an object of the request parts used (`{ authorization }`, `{ authorization, body }`, `{ token }`). */
 export interface HandlerResult<T extends object = object> {
   status: number;
   body: ApiResult<T>;
