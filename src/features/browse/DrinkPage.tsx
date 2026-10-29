@@ -82,11 +82,14 @@ function EditForm({ drink, hasReviews, onDone }: { drink: Drink; hasReviews: boo
         subtypeId = ensured.id;
         setSubtype({ subtypeId, newName: null });
       }
-      const { error: err } = await supabase
+      const { data, error: err } = await supabase
         .from('drinks')
         .update({ name: trimmed, type, subtype_id: subtypeId })
-        .eq('id', drink.id);
+        .eq('id', drink.id)
+        .select('id');
       if (err) throw err;
+      // RLS denies silently (0 rows) once someone else has reviewed the drink.
+      if (!data?.length) throw new Error('drink_not_updated');
       return true;
     },
     onSuccess: async (saved) => {
@@ -183,8 +186,10 @@ export default function DrinkPage() {
 
   const del = useMutation({
     mutationFn: async () => {
-      const { error } = await supabase.from('drinks').delete().eq('id', id!);
+      const { data, error } = await supabase.from('drinks').delete().eq('id', id!).select('id');
       if (error) throw error;
+      // RLS denies silently (0 rows) once someone else has reviewed the drink.
+      if (!data?.length) throw new Error('drink_not_deleted');
     },
     onSuccess: async () => {
       await Promise.all([

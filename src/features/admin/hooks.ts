@@ -4,7 +4,7 @@ import type { ApiErrorCode, ApiResult } from '../../lib/schemas';
 import { queryKeys } from '../../data/queries';
 import type { ResetRequest } from '../../types/domain';
 
-export const adminKeys = {
+const adminKeys = {
   resetRequests: ['admin', 'reset_requests'],
 } as const;
 
@@ -68,7 +68,7 @@ export class AdminApiError extends Error {
   }
 }
 
-export type AdminUserAction = 'delete' | 'ban' | 'unban';
+type AdminUserAction = 'delete' | 'ban' | 'unban';
 
 export function useAdminUserAction() {
   const queryClient = useQueryClient();

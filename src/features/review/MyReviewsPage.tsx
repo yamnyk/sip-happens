@@ -50,8 +50,10 @@ export default function MyReviewsPage() {
 
   const remove = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from('reviews').delete().eq('id', id);
+      const { data, error } = await supabase.from('reviews').delete().eq('id', id).select('id');
       if (error) throw error;
+      // RLS denies silently (0 rows), e.g. after a ban.
+      if (!data?.length) throw new Error('review_not_deleted');
     },
     onSuccess: async () => {
       setConfirmId(null);

@@ -20,11 +20,11 @@ export function draftContext(drinkId: string | null, name: string, type: DrinkTy
   return `${n}+${type}`;
 }
 
-export const draftKey = (userId: string, context: string, stage: StageName) => `draft:${userId}:${context}:${stage}`;
+const draftKey = (userId: string, context: string, stage: StageName) => `draft:${userId}:${context}:${stage}`;
 
-export const draftMetaKey = (userId: string, context: string) => `draft:${userId}:${context}:meta`;
+const draftMetaKey = (userId: string, context: string) => `draft:${userId}:${context}:meta`;
 
-export interface ParsedDraftKey {
+interface ParsedDraftKey {
   userId: string;
   context: string;
   segment: StageName | 'meta';
@@ -75,7 +75,7 @@ export async function saveStageDraft(userId: string, context: string, stage: Sta
   }
 }
 
-export interface DraftMeta {
+interface DraftMeta {
   name: string;
   type: DrinkType | null;
   subtype: SubtypeValue;

@@ -1,7 +1,7 @@
 import type { NickError } from './lib/nick';
 import type { ReviewErrorCode } from './lib/review';
 import type { ApiErrorCode } from './lib/schemas';
-import type { DrinkGroup, DrinkType } from './types/domain';
+import type { DrinkType } from './types/domain';
 
 /** Shared UI strings. Feature-specific strings live in each feature's own strings.ts. */
 export const strings = {
@@ -12,10 +12,8 @@ export const strings = {
     loading: 'Завантаження...',
     save: 'Зберегти',
     cancel: 'Скасувати',
-    delete: 'Видалити',
-    back: 'Назад',
     error: 'Щось пішло не так. Спробуй ще раз.',
-    empty: 'Поки тут порожньо',
+    retry: 'Спробувати ще раз',
   },
   stage: { first: 'Перше враження', final: 'Фінал' },
 } as const;
@@ -30,12 +28,6 @@ export const typeLabels: Record<DrinkType, string> = {
   other: 'Інше',
 };
 
-export const groupLabels: Record<DrinkGroup, string> = {
-  wine: 'Вино',
-  port: 'Портвейн',
-  gin: 'Джин',
-  other: 'Інше',
-};
 
 export const nickErrors: Record<NickError, string> = {
   nick_too_short: 'Нік закороткий (мінімум 3 символи)',

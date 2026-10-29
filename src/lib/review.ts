@@ -20,14 +20,14 @@ export type ReviewErrorCode =
   | 'final_note_too_short'
   | 'final_scores_required';
 
-export type StageStatus = 'empty' | 'valid' | 'invalid';
+type StageStatus = 'empty' | 'valid' | 'invalid';
 
-export interface StageState {
+interface StageState {
   status: StageStatus;
   errors: ReviewErrorCode[];
 }
 
-export interface ReviewState {
+interface ReviewState {
   first: StageState;
   final: StageState;
   /** At least one stage valid and no stage invalid. */
@@ -82,7 +82,7 @@ export function evaluateReview(group: DrinkGroup, draft: ReviewDraft): ReviewSta
   return { first, final, canSave: noneInvalid && anyValid };
 }
 
-export interface ReviewRow {
+interface ReviewRow {
   first_scores: Scores | null;
   first_note: string | null;
   final_scores: Scores | null;

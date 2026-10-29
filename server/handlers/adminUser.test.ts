@@ -59,6 +59,21 @@ describe('adminUser', () => {
     expect(p.auth.deleteUser).not.toHaveBeenCalled();
   });
 
+  it('does not let an admin delete, ban or unban another admin', async () => {
+    const p = fakePorts();
+    const otherAdmin = { id: USER_ID, nick: 'boss2', is_admin: true, disabled: false };
+    p.profiles.getById.mockImplementation(async (id: string) =>
+      id === ADMIN_ID ? goodAdmin : id === USER_ID ? otherAdmin : null,
+    );
+    for (const action of ['delete', 'ban', 'unban'] as const) {
+      const res = await adminUser({ ports: asPorts(p) }, { authorization: bearer, body: { userId: USER_ID, action } });
+      expect(res.body).toEqual({ ok: false, error: 'forbidden' });
+    }
+    expect(p.auth.deleteUser).not.toHaveBeenCalled();
+    expect(p.auth.setBanned).not.toHaveBeenCalled();
+    expect(p.profiles.setDisabled).not.toHaveBeenCalled();
+  });
+
   it('rejects invalid bodies', async () => {
     const p = setup();
     const res = await adminUser({ ports: asPorts(p) }, { authorization: bearer, body: { userId: 'x', action: 'nuke' } });

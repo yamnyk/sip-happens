@@ -7,7 +7,7 @@ Schema, RLS, triggers and functions for sip-happens. Owner applies them by hand.
 **Option A: SQL editor (simplest)**
 
 1. Supabase dashboard, SQL Editor, New query.
-2. Paste the full contents of each file in `supabase/migrations/` in numeric order (`0001_init.sql`, then `0002_drink_subtypes.sql`), one Run per file. Both are idempotent, re-running is safe.
+2. Paste the full contents of each file in `supabase/migrations/` in numeric order (`0001_init.sql`, `0002_drink_subtypes.sql`, `0003_reset_request_per_user_cap.sql`), one Run per file. All are idempotent, re-running is safe.
 3. Verify: paste `supabase/tests/admin_flag.sql`, Run. Expect the notice `admin_flag: all assertions passed`. It rolls back, nothing persists. Any failure names the broken guarantee.
 
 **Option B: CLI**

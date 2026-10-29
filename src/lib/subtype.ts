@@ -1,9 +1,9 @@
 import { typeLabels } from '../strings';
 import type { Drink, DrinkSubtype } from '../types/domain';
 
-export const SUBTYPE_MAX = 40;
+const SUBTYPE_MAX = 40;
 
-export type SubtypeError = 'subtype_empty' | 'subtype_too_long' | 'subtype_invalid_chars';
+type SubtypeError = 'subtype_empty' | 'subtype_too_long' | 'subtype_invalid_chars';
 
 /** Identity of a subtype name. Mirrors name_normalized in the DB: NFC, trimmed, whitespace collapsed, lowercase. */
 export function normalizeSubtypeName(name: string): string {

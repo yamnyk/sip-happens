@@ -8,7 +8,7 @@ export interface AdminUserInput {
   body: unknown;
 }
 
-/** Admin only: delete, ban or unban a user. The caller is verified from their access token. */
+/** Admin only: delete, ban or unban a non-admin user. The caller is verified from their access token. */
 export async function adminUser(deps: Deps, input: AdminUserInput): Promise<HandlerResult> {
   const { ports } = deps;
 
@@ -27,6 +27,8 @@ export async function adminUser(deps: Deps, input: AdminUserInput): Promise<Hand
   if (userId === callerId) return fail('forbidden');
   const target = await ports.profiles.getById(userId);
   if (!target) return fail('invalid_input');
+  // Admins cannot act on other admins, so no admin can lock out the rest (or the last one).
+  if (target.is_admin) return fail('forbidden');
 
   if (action === 'delete') {
     await ports.auth.deleteUser(userId);

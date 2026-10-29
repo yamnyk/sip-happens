@@ -319,10 +319,22 @@ export default function ReviewFormPage() {
         createdRef.current[context] = targetId;
       }
       const row = toReviewRow(group, draft, state);
-      const { error: rErr } = myReview
-        ? await supabase.from('reviews').update(row).eq('id', myReview.id)
-        : await supabase.from('reviews').insert({ drink_id: targetId, ...row });
-      if (rErr) throw rErr;
+      if (myReview) {
+        const { data: updated, error: rErr } = await supabase
+          .from('reviews')
+          .update(row)
+          .eq('id', myReview.id)
+          .select('id');
+        if (rErr) throw rErr;
+        // RLS or a delete on another device turns the update into a silent no-op. Refetch so a retry inserts.
+        if (!updated?.length) {
+          await queryClient.invalidateQueries({ queryKey: queryKeys.reviews });
+          throw new Error('review_not_updated');
+        }
+      } else {
+        const { error: rErr } = await supabase.from('reviews').insert({ drink_id: targetId, ...row });
+        if (rErr) throw rErr;
+      }
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: queryKeys.drinks }),
         queryClient.invalidateQueries({ queryKey: queryKeys.reviews }),

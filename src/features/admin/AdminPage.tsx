@@ -175,7 +175,7 @@ export default function AdminPage() {
                       {t.resolve}
                     </button>
                   )}
-                  {!isMe && (
+                  {!isMe && !p.is_admin && (
                     <>
                       <button
                         type="button"

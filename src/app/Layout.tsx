@@ -12,9 +12,26 @@ const tabs = [
 
 /** Guards the signed-in area and renders header plus bottom tab bar. */
 export function Layout() {
-  const { session, profile, loading, signOut } = useSession();
+  const { session, profile, loading, profileError, retryProfile, signOut } = useSession();
 
   if (loading) return <p className="p-4 text-neutral-400">{strings.common.loading}</p>;
+  // Do not bounce a valid session to /login just because the profile fetch failed.
+  if (profileError)
+    return (
+      <div className="mx-auto flex min-h-screen max-w-sm flex-col justify-center gap-3 px-4 py-8">
+        <p className="text-red-400">{strings.common.error}</p>
+        <button
+          type="button"
+          onClick={retryProfile}
+          className="min-h-11 w-full rounded-lg bg-amber-400 px-4 font-semibold text-neutral-950"
+        >
+          {strings.common.retry}
+        </button>
+        <button type="button" onClick={() => void signOut()} className="min-h-11 text-sm text-neutral-400">
+          {strings.nav.logout}
+        </button>
+      </div>
+    );
   if (!session || !profile) return <Navigate to="/login" replace />;
 
   return (

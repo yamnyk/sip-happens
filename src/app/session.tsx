@@ -10,6 +10,9 @@ interface SessionValue {
   profile: Profile | null;
   /** True until the initial session (and profile, when signed in) are known. */
   loading: boolean;
+  /** Signed in, but the profile could not be loaded at all. The session is still valid. */
+  profileError: boolean;
+  retryProfile: () => void;
   /** Throws on bad credentials. */
   signIn: (nick: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
@@ -23,10 +26,11 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   const [sessionLoading, setSessionLoading] = useState(true);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
-      setSession(data.session);
-      setSessionLoading(false);
-    });
+    supabase.auth
+      .getSession()
+      .then(({ data }) => setSession(data.session))
+      .catch(() => setSession(null))
+      .finally(() => setSessionLoading(false));
     const { data } = supabase.auth.onAuthStateChange((_event, next) => setSession(next));
     return () => data.subscription.unsubscribe();
   }, []);
@@ -54,6 +58,8 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   }, [queryClient]);
 
   const profile = profileQuery.data ?? null;
+  const { refetch: refetchProfile } = profileQuery;
+  const retryProfile = useCallback(() => void refetchProfile(), [refetchProfile]);
 
   useEffect(() => {
     if (profile?.disabled) void signOut();
@@ -64,10 +70,12 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       session,
       profile: profile?.disabled ? null : profile,
       loading: sessionLoading || (Boolean(userId) && profileQuery.isLoading),
+      profileError: Boolean(userId) && profileQuery.isError && !profile,
+      retryProfile,
       signIn,
       signOut,
     }),
-    [session, profile, sessionLoading, userId, profileQuery.isLoading, signIn, signOut],
+    [session, profile, sessionLoading, userId, profileQuery.isLoading, profileQuery.isError, retryProfile, signIn, signOut],
   );
 
   return <SessionContext.Provider value={value}>{children}</SessionContext.Provider>;

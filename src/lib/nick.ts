@@ -1,6 +1,6 @@
-export const NICK_MIN = 3;
-export const NICK_MAX = 24;
-export const EMAIL_DOMAIN = 'sip.invalid';
+const NICK_MIN = 3;
+const NICK_MAX = 24;
+const EMAIL_DOMAIN = 'sip.invalid';
 
 export type NickError = 'nick_too_short' | 'nick_too_long' | 'nick_whitespace' | 'nick_invalid_chars';
 

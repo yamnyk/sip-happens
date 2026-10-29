@@ -15,7 +15,7 @@ export const EMPTY_SUBTYPE: SubtypeValue = { subtypeId: null, newName: null };
 
 export const hasSubtype = (v: SubtypeValue): boolean => Boolean(v.subtypeId) || Boolean(v.newName);
 
-export type EnsureSubtypeResult = { id: string } | { duplicateOf: DrinkSubtype };
+type EnsureSubtypeResult = { id: string } | { duplicateOf: DrinkSubtype };
 
 /**
  * Resolves a picker value to a subtype id. Existing id passes through; a pending new name is inserted.

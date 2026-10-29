@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { Link, useNavigate, useParams } from 'react-router';
 import { apiErrors } from '../../strings';
+import { checkPassword } from '../../lib/schemas';
 import { callApi } from './api';
 import { authStrings } from './strings';
 import { errCls, inputCls, linkCls, primaryBtnCls } from './ui';
@@ -16,8 +17,8 @@ export default function ResetPage() {
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
-    if (password.length < 8) return setError(authStrings.join.passwordShort);
-    if (password.length > 72) return setError(authStrings.join.passwordLong);
+    const passwordErr = checkPassword(password);
+    if (passwordErr) return setError(passwordErr === 'password_too_short' ? authStrings.join.passwordShort : authStrings.join.passwordLong);
     setBusy(true);
     setError(null);
     const res = await callApi('/api/reset-complete', { token, password });

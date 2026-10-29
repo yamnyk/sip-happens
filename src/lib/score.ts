@@ -1,7 +1,7 @@
 import { CRITERIA, SCORE_MAX, SCORE_MIN } from '../config/criteria';
 import type { DrinkGroup, Review, Scores } from '../types/domain';
 
-export function round1(n: number): number {
+function round1(n: number): number {
   return Math.round(n * 10) / 10;
 }
 
@@ -40,7 +40,7 @@ export function authorScore(group: DrinkGroup, review: Review): number | null {
   return raw === null ? null : round1(raw);
 }
 
-export interface DrinkStats {
+interface DrinkStats {
   /** Mean of author scores, one decimal. Null when nobody scored. */
   average: number | null;
   /** Number of reviews (scored or not). */

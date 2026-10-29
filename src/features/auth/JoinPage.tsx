@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router';
 import { useSession } from '../../app/session';
 import { validateNick } from '../../lib/nick';
 import { apiErrors, nickErrors } from '../../strings';
+import { checkPassword } from '../../lib/schemas';
 import { callApi } from './api';
 import { authStrings } from './strings';
 import { errCls, inputCls, linkCls, primaryBtnCls } from './ui';
@@ -43,8 +44,8 @@ export default function JoinPage() {
     e.preventDefault();
     const nickErr = validateNick(nick);
     if (nickErr) return setError(nickErrors[nickErr]);
-    if (password.length < 8) return setError(s.passwordShort);
-    if (password.length > 72) return setError(s.passwordLong);
+    const passwordErr = checkPassword(password);
+    if (passwordErr) return setError(passwordErr === 'password_too_short' ? s.passwordShort : s.passwordLong);
     setBusy(true);
     setError(null);
     const res = await callApi('/api/register', { token, nick, password });

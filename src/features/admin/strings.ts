@@ -10,7 +10,6 @@ export const adminStrings = {
   admin: 'адмін',
   resetPending: 'Є запит на скидання пароля',
   resolve: 'Скинути пароль',
-  resolveHint: 'Створює посилання на 7 днів',
   linkReady: 'Посилання для скидання (7 днів). Відправ вручну:',
   copy: 'Копіювати',
   copied: 'Скопійовано',
