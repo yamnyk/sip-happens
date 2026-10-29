@@ -1,4 +1,4 @@
-import { resetRequestBodySchema } from "../../src/lib/schemas.js";
+import { resetRequestBodySchema } from "../../contract/schemas.js";
 import type { Deps } from "../ports.js";
 import { fail, ok, type HandlerResult } from "./common.js";
 

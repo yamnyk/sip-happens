@@ -1,7 +1,7 @@
 import {
   inviteStatusQuerySchema,
   type InviteStatus,
-} from "../../src/lib/schemas.js";
+} from "../../contract/schemas.js";
 import type { Deps } from "../ports.js";
 import { ok, type HandlerResult } from "./common.js";
 

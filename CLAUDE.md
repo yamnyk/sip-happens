@@ -8,11 +8,12 @@ Vite, React 19, TypeScript 7, Tailwind v4, react-router, TanStack Query, zod, Su
 
 ## Layout
 
-- `src/config/criteria.ts`: single source of truth for drink types, criteria and weights.
-- `src/lib/`: shared contract. `score.ts` (totals), `nick.ts` (`nickToEmail`), `schemas.ts` (zod), `review.ts`, `supabase.ts`. Imported by client and server.
-- `src/features/`: UI by area (`auth`, `review`, `invites`, `browse`, `admin`).
-- `src/data/queries.ts`: all data fetching (fetch-all, cached). Aggregation happens client-side.
-- `src/strings.ts`, `src/features/*/strings.ts`: all UI text.
+- `contract/`: the only code shared by client and server: `nick.ts` (`nickToEmail`), `schemas.ts` (zod), `domain.ts` (types). No UI or client imports.
+- `src/app/`: shell only (`App.tsx` routes, `providers.tsx`, `Layout.tsx`).
+- `src/modules/<area>/` (`auth`, `review`, `catalog`, `people`, `invites`, `admin`, `subtypes`): UI by area. Each has an `index.ts` public API; other modules import only from it.
+- `src/shared/`: client code used by several modules: `api/` (supabase client, fetch-all queries, `callApi`), `lib/` (`score.ts`, `review.ts`, ...), `config/criteria.ts` (single source of truth for drink types, criteria and weights), `ui/`, `types/`, `strings.ts`.
+- UI text: `src/shared/strings.ts` (shared) and `src/modules/*/strings.ts`. Criterion labels stay in `criteria.ts`.
+- Imports: `#app/*`, `#modules/*`, `#shared/*`, `#contract/*`, `#server/*` (package.json `imports`), always ending in `.js`. Same-folder imports use `./x.js`; no `../`. Enforced by `pnpm lint`.
 - `server/handlers/`: pure handler logic `(deps, input) => result`, unit-tested with mocked Supabase.
 - `api/`: thin Web-standard wrappers around `server/handlers/`. Only six routes exist. Do not add more.
 - `supabase/`: migrations, RLS, triggers, SQL tests. Owner applies them by hand.

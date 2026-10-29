@@ -1,4 +1,4 @@
-import { adminUserBodySchema } from "../../src/lib/schemas.js";
+import { adminUserBodySchema } from "../../contract/schemas.js";
 import type { Deps } from "../ports.js";
 import { fail, ok, parseBearer, type HandlerResult } from "./common.js";
 

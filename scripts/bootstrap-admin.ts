@@ -4,9 +4,9 @@
  */
 import readline from "node:readline";
 import { Writable } from "node:stream";
-import { nickToEmail, validateNick } from "../src/lib/nick";
-import { passwordSchema } from "../src/lib/schemas";
-import { getAdminClient } from "../server/supabase-admin";
+import { nickToEmail, validateNick } from "../contract/nick.js";
+import { passwordSchema } from "../contract/schemas.js";
+import { getAdminClient } from "../server/supabase-admin.js";
 
 function ask(question: string, hidden = false): Promise<string> {
   let muted = false;

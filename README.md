@@ -71,7 +71,7 @@ Rules:
 - Only six Vercel Functions exist: `register`, `invite-status`, `reset-request`, `reset-complete`, `admin-user`, `keepalive`.
 - Those functions use the secret key on the server. It never reaches the browser.
 - Handler logic lives in `server/handlers/` as pure functions. Files in `api/` are thin wrappers.
-- Login is nickname plus password. Supabase Auth needs an email, so each nick maps to a synthetic address: first 32 hex chars of SHA-256 over the NFC-normalized lowercase nick, at `@sip.invalid`. `nickToEmail()` in `src/lib/nick.ts` is shared by client and server. No email is ever sent.
+- Login is nickname plus password. Supabase Auth needs an email, so each nick maps to a synthetic address: first 32 hex chars of SHA-256 over the NFC-normalized lowercase nick, at `@sip.invalid`. `nickToEmail()` in `contract/nick.ts` is shared by client and server. No email is ever sent.
 - Criteria and weights live in `src/config/criteria.ts`. Totals are computed in TypeScript, so changing a weight changes every score.
 
 ## Invite flow

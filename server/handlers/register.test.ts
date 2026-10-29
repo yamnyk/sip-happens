@@ -1,6 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { asPorts, fakePorts, INVITER_ID, TOKEN, USER_ID } from "../test-utils";
-import { register } from "./register";
+import {
+  asPorts,
+  fakePorts,
+  INVITER_ID,
+  TOKEN,
+  USER_ID,
+} from "../test-utils.js";
+import { register } from "./register.js";
 
 const body = { token: TOKEN, nick: "Gogi", password: "supersecret1" };
 

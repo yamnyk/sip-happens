@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { ADMIN_ID, asPorts, fakePorts, USER_ID } from "../test-utils";
-import { adminUser } from "./adminUser";
+import { ADMIN_ID, asPorts, fakePorts, USER_ID } from "../test-utils.js";
+import { adminUser } from "./adminUser.js";
 
 const bearer = "Bearer some.jwt.value";
 const target = {

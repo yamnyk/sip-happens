@@ -1,5 +1,5 @@
 import { createHash, timingSafeEqual } from "node:crypto";
-import type { ApiErrorCode, ApiResult } from "../../src/lib/schemas.js";
+import type { ApiErrorCode, ApiResult } from "../../contract/schemas.js";
 
 export interface HandlerResult<T extends object = object> {
   status: number;

@@ -1,7 +1,12 @@
-import { Link, NavLink, Navigate, Outlet } from "react-router";
-import { strings } from "../strings";
-import { AddIcon, CatalogIcon, MineIcon, PeopleIcon } from "./icons";
-import { useSession } from "./session";
+import { Link, NavLink, Outlet } from "react-router";
+import { strings } from "#shared/strings.js";
+import {
+  AddIcon,
+  CatalogIcon,
+  MineIcon,
+  PeopleIcon,
+} from "#shared/ui/icons.js";
+import { useSession } from "#modules/auth/index.js";
 
 const tabs = [
   { to: "/", label: strings.tabs.catalog, end: true, Icon: CatalogIcon },
@@ -10,35 +15,11 @@ const tabs = [
   { to: "/people", label: strings.tabs.people, end: false, Icon: PeopleIcon },
 ] as const;
 
-/** Guards the signed-in area and renders header plus bottom tab bar. */
+/** Signed-in shell: header plus bottom tab bar. */
 export function Layout() {
-  const { session, profile, loading, profileError, retryProfile, signOut } =
-    useSession();
-
-  if (loading)
-    return <p className="p-4 text-neutral-400">{strings.common.loading}</p>;
-  // Do not bounce a valid session to /login just because the profile fetch failed.
-  if (profileError)
-    return (
-      <div className="mx-auto flex min-h-screen max-w-sm flex-col justify-center gap-3 px-4 py-8">
-        <p className="text-red-400">{strings.common.error}</p>
-        <button
-          type="button"
-          onClick={retryProfile}
-          className="min-h-11 w-full rounded-lg bg-amber-400 px-4 font-semibold text-neutral-950"
-        >
-          {strings.common.retry}
-        </button>
-        <button
-          type="button"
-          onClick={() => void signOut()}
-          className="min-h-11 text-sm text-neutral-400"
-        >
-          {strings.nav.logout}
-        </button>
-      </div>
-    );
-  if (!session || !profile) return <Navigate to="/login" replace />;
+  const { profile, signOut } = useSession();
+  // RequireAuth renders this only with a loaded profile.
+  if (!profile) return null;
 
   return (
     <div className="mx-auto flex min-h-screen max-w-xl flex-col">
@@ -79,10 +60,4 @@ export function Layout() {
       </nav>
     </div>
   );
-}
-
-export function RequireAdmin() {
-  const { profile } = useSession();
-  if (!profile?.is_admin) return <Navigate to="/" replace />;
-  return <Outlet />;
 }

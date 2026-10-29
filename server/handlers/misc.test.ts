@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { asPorts, fakePorts, TOKEN, USER_ID } from "../test-utils";
-import { inviteStatus } from "./inviteStatus";
-import { keepalive } from "./keepalive";
-import { resetComplete } from "./resetComplete";
-import { resetRequest } from "./resetRequest";
+import { asPorts, fakePorts, TOKEN, USER_ID } from "../test-utils.js";
+import { inviteStatus } from "./inviteStatus.js";
+import { keepalive } from "./keepalive.js";
+import { resetComplete } from "./resetComplete.js";
+import { resetRequest } from "./resetRequest.js";
 
 describe("keepalive", () => {
   const secret = "cron-secret-value";

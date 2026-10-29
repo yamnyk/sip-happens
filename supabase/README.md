@@ -29,7 +29,7 @@ supabase db push --password "$SB_DB_PASSWORD"
 ## Optional: generate types
 
 ```bash
-pnpm dlx supabase gen types typescript --project-id <your-project-ref> --schema public > src/types/database.types.ts
+pnpm dlx supabase gen types typescript --project-id <your-project-ref> --schema public > src/shared/types/database.types.ts
 ```
 
 ## Notes
