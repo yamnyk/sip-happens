@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { checkPassword, passwordSchema } from "./schemas.js";
+import {
+  checkPassword,
+  passwordSchema,
+  registerBodySchema,
+} from "./schemas.js";
 
 describe("passwordSchema", () => {
   it("accepts 8 to 72 bytes", () => {
@@ -38,5 +42,22 @@ describe("checkPassword", () => {
     expect(checkPassword("1234567")).toBe("password_too_short");
     // 37 Cyrillic letters = 74 bytes, fewer than 72 characters
     expect(checkPassword("я".repeat(37))).toBe("password_too_long");
+  });
+});
+
+describe("registerBodySchema nick scripts", () => {
+  const base = {
+    token: "123e4567-e89b-42d3-a456-426614174000",
+    password: "password1",
+  };
+  it("rejects mixed Latin and Cyrillic nicks", () => {
+    expect(
+      registerBodySchema.safeParse({ ...base, nick: "Ivanка" }).success,
+    ).toBe(false);
+  });
+  it("accepts single-script nicks", () => {
+    expect(
+      registerBodySchema.safeParse({ ...base, nick: "Іван_1" }).success,
+    ).toBe(true);
   });
 });

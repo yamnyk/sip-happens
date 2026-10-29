@@ -2,7 +2,10 @@ import { resetCompleteBodySchema } from "../../contract/schemas.js";
 import type { Deps } from "../ports.js";
 import { fail, ok, type HandlerResult } from "./common.js";
 
-/** Claim the reset link, set the new password, release the claim if that fails. */
+/**
+ * Claim the reset link, set the new password, release the claim on a definite failure.
+ * If the update throws (timeout, network) the password may have changed, so the claim stays consumed.
+ */
 export async function resetComplete(
   deps: Deps,
   input: unknown,
@@ -29,11 +32,12 @@ export async function resetComplete(
     return fail("invalid_token");
   }
 
-  try {
-    await ports.auth.updatePassword(userId, password);
-  } catch (error) {
+  const updated = await ports.auth.updatePassword(userId, password);
+  if (!updated.ok) {
     await release();
-    throw error;
+    if (updated.reason === "weak_password") return fail("invalid_input");
+    console.error("update password failed:", updated.reason);
+    return fail("server_error");
   }
 
   try {

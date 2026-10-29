@@ -7,5 +7,6 @@ export const peopleStrings = {
     notFound: "Людину не знайдено",
     byType: "Середня за типом",
     reviews: "Ревʼю",
+    banned: "заблокований",
   },
 } as const;

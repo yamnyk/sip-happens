@@ -9,6 +9,7 @@ import { peopleStrings as t } from "./strings.js";
 import { ScoreBadge } from "#shared/ui/ScoreBadge.js";
 import { cardClass } from "#shared/ui/Card.js";
 import { PageStatus, PageTitle } from "#shared/ui/Status.js";
+import { Tag } from "#shared/ui/Tag.js";
 
 export function PersonPage() {
   const { id } = useParams<{ id: string }>();
@@ -33,7 +34,10 @@ export function PersonPage() {
 
   return (
     <div className="flex flex-col gap-5 py-2">
-      <PageTitle>{person.nick}</PageTitle>
+      <div className="flex items-center gap-3">
+        <PageTitle>{person.nick}</PageTitle>
+        {person.disabled && <Tag tone="danger">{t.people.banned}</Tag>}
+      </div>
 
       {data.perType.length > 0 && (
         <section className="flex flex-col gap-2">

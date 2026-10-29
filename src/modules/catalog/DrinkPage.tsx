@@ -8,6 +8,7 @@ import { useSubtypesById } from "#modules/subtypes/index.js";
 import { strings } from "#shared/strings.js";
 import { ScoreBadge } from "#shared/ui/ScoreBadge.js";
 import { PageStatus } from "#shared/ui/Status.js";
+import { Tag } from "#shared/ui/Tag.js";
 import { AdminActions } from "./AdminActions.js";
 import { DrinkHeader } from "./DrinkHeader.js";
 import { DrinkReviewCard } from "./DrinkReviewCard.js";
@@ -67,12 +68,13 @@ export function DrinkPage() {
         <section className="flex flex-col gap-2">
           <h2 className="text-sm text-neutral-400">{t.drink.spread}</h2>
           <ul className="flex flex-wrap gap-2">
-            {rows.map(({ review, nick, score }) => (
+            {rows.map(({ review, nick, disabled, score }) => (
               <li
                 key={review.id}
                 className="flex items-center gap-2 rounded-lg bg-neutral-900 py-1 pr-1 pl-3"
               >
                 <span className="max-w-28 truncate text-sm">{nick}</span>
+                {disabled && <Tag tone="danger">{t.drink.banned}</Tag>}
                 <ScoreBadge score={score} size="sm" />
               </li>
             ))}

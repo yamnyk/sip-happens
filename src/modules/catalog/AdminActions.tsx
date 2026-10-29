@@ -29,12 +29,13 @@ export function AdminActions({
     mutationFn: async () => {
       await deleteDrink(drink.id);
     },
-    onSuccess: async () => {
-      await Promise.all([
+    onSuccess: () => {
+      // Leave the page first so the deleted drink never renders as "not found".
+      navigate("/", { replace: true });
+      void Promise.all([
         queryClient.invalidateQueries({ queryKey: queryKeys.drinks }),
         queryClient.invalidateQueries({ queryKey: queryKeys.reviews }),
       ]);
-      navigate("/", { replace: true });
     },
     onError: () => setDeleteError(true),
   });

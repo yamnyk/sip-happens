@@ -17,6 +17,7 @@ import { cardClass } from "#shared/ui/Card.js";
 import { Chip } from "#shared/ui/Chip.js";
 import { Input } from "#shared/ui/Input.js";
 import { ErrorText } from "#shared/ui/Status.js";
+import { DrinkFormError, saveErrorMessage } from "./drinkErrors.js";
 import { updateDrink } from "./queries.js";
 import { catalogStrings as t } from "./strings.js";
 
@@ -47,7 +48,7 @@ export function EditForm({
   const save = useMutation({
     mutationFn: async (): Promise<boolean> => {
       const trimmed = name.trim();
-      if (!trimmed) throw new Error(t.drink.nameRequired);
+      if (!trimmed) throw new DrinkFormError("name_required");
       let subtypeId: string | null = null;
       if (type === "other") {
         if (!hasSubtype(subtype.value)) {
@@ -78,12 +79,7 @@ export function EditForm({
       await queryClient.invalidateQueries({ queryKey: queryKeys.drinks });
       onDone();
     },
-    onError: (e: unknown) =>
-      setError(
-        e instanceof Error && e.message === t.drink.nameRequired
-          ? e.message
-          : t.drink.saveError,
-      ),
+    onError: (e: unknown) => setError(saveErrorMessage(e, t.drink)),
   });
 
   return (

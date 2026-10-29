@@ -17,6 +17,21 @@ export function getAdminClient(): AdminClient {
   return cached;
 }
 
+/**
+ * True when the outcome of an Auth call is unknown: the request may have been applied.
+ * Network failures, timeouts and 5xx are ambiguous; an error with a 4xx status or a code is definite.
+ */
+function isAmbiguousAuthError(error: {
+  name?: string;
+  status?: number;
+  code?: string;
+}): boolean {
+  if (error.name === "AuthRetryableFetchError") return true;
+  if (error.status === 0 || (error.status !== undefined && error.status >= 500))
+    return true;
+  return error.status === undefined && error.code === undefined;
+}
+
 /** Ban duration far enough out to be permanent for this app. */
 const BAN_FOREVER = "876000h";
 
@@ -106,17 +121,21 @@ export function createPorts(client: AdminClient = getAdminClient()): Ports {
           email_confirm: true,
           user_metadata: { nick, invited_by: invitedBy },
         });
+        if (error && isAmbiguousAuthError(error))
+          throw new Error(`create user failed: ${error.message}`);
         if (error || !data.user) {
           const exists =
             error?.code === "email_exists" ||
             error?.code === "user_already_exists";
           // Only the code and message: the request body holds the password.
-          if (!exists)
+          if (!exists && error?.code !== "weak_password")
             console.error(
               "auth createUser failed:",
               error?.code,
               error?.message,
             );
+          if (error?.code === "weak_password")
+            return { ok: false, reason: "weak_password" };
           return { ok: false, reason: exists ? "exists" : "other" };
         }
         return { ok: true, userId: data.user.id };
@@ -125,7 +144,14 @@ export function createPorts(client: AdminClient = getAdminClient()): Ports {
         const { error } = await client.auth.admin.updateUserById(userId, {
           password,
         });
-        if (error) throw new Error(`update password failed: ${error.message}`);
+        if (error && isAmbiguousAuthError(error))
+          throw new Error(`update password failed: ${error.message}`);
+        if (error)
+          return {
+            ok: false,
+            reason: error.code === "weak_password" ? "weak_password" : "other",
+          };
+        return { ok: true };
       },
       async verifyJwt(jwt) {
         const { data, error } = await client.auth.getUser(jwt);

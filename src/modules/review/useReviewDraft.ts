@@ -158,6 +158,7 @@ export function useReviewDraft({
     setHydratedKey(null);
     setStage("first");
     prevContextRef.current = null;
+    stageInitRef.current = false;
   }
 
   return { draft, stage, setStage, edit, pruneTo, reset };

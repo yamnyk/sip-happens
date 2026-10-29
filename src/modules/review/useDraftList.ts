@@ -1,5 +1,10 @@
 import { useCallback, useEffect, useState } from "react";
-import { clearDrafts, listDrafts, type DraftEntry } from "./drafts.js";
+import {
+  clearDrafts,
+  listDrafts,
+  whenDraftWritesSettled,
+  type DraftEntry,
+} from "./drafts.js";
 
 /** Local drafts of the user: loaded on mount and when userId changes; remove clears one context and reloads. */
 export function useDraftList(userId: string | undefined) {
@@ -7,6 +12,8 @@ export function useDraftList(userId: string | undefined) {
 
   const load = useCallback(async () => {
     if (!userId) return [];
+    // The form flushes its draft on unmount; wait for it so the list shows the latest edit.
+    await whenDraftWritesSettled();
     return listDrafts(userId);
   }, [userId]);
 

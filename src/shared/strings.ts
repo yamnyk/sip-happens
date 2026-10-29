@@ -15,6 +15,7 @@ export const strings = {
     error: "Щось пішло не так. Спробуй ще раз.",
     retry: "Спробувати ще раз",
   },
+  notFound: { title: "Сторінку не знайдено", home: "На головну" },
   stage: { first: "Перше враження", final: "Фінал" },
 } as const;
 
@@ -33,6 +34,7 @@ export const nickErrors: Record<NickError, string> = {
   nick_too_long: "Нік задовгий (максимум 24 символи)",
   nick_whitespace: "Прибери пробіли на початку і в кінці",
   nick_invalid_chars: "У ніку є недопустимі символи",
+  nick_mixed_scripts: "Нік не може змішувати латиницю й кирилицю",
 };
 
 export const reviewErrors: Record<ReviewErrorCode, string> = {

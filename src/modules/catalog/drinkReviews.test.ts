@@ -67,4 +67,21 @@ describe("buildDrinkReviewRows", () => {
     expect(rows.map((r) => r.review.id)).toEqual(["high", "low", "none"]);
     expect(rows[2]?.score).toBeNull();
   });
+
+  it("flags banned authors and defaults to not banned", () => {
+    const rows = buildDrinkReviewRows(
+      drink,
+      [
+        review({ id: "r1", author_id: "a" }),
+        review({ id: "r2", author_id: "b" }),
+      ],
+      [
+        { id: "a", nick: "A", disabled: true },
+        { id: "b", nick: "B", disabled: false },
+      ],
+      "?",
+    );
+    expect(rows.find((r) => r.review.id === "r1")?.disabled).toBe(true);
+    expect(rows.find((r) => r.review.id === "r2")?.disabled).toBe(false);
+  });
 });

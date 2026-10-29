@@ -4,6 +4,7 @@ import {
   ForgotPage,
   JoinPage,
   LoginPage,
+  RedirectIfAuthed,
   RequireAuth,
   ResetPage,
 } from "#modules/auth/index.js";
@@ -12,13 +13,16 @@ import { InvitesPage } from "#modules/invites/index.js";
 import { PeoplePage, PersonPage } from "#modules/people/index.js";
 import { MyReviewsPage, ReviewFormPage } from "#modules/review/index.js";
 import { Layout } from "./Layout.js";
+import { NotFoundPage } from "./NotFoundPage.js";
 
 export function App() {
   return (
     <Routes>
-      <Route path="/login" element={<LoginPage />} />
-      <Route path="/forgot" element={<ForgotPage />} />
-      <Route path="/join/:token" element={<JoinPage />} />
+      <Route element={<RedirectIfAuthed />}>
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/forgot" element={<ForgotPage />} />
+        <Route path="/join/:token" element={<JoinPage />} />
+      </Route>
       <Route path="/reset/:token" element={<ResetPage />} />
       <Route element={<RequireAuth />}>
         <Route element={<Layout />}>
@@ -35,6 +39,7 @@ export function App() {
           </Route>
         </Route>
       </Route>
+      <Route path="*" element={<NotFoundPage />} />
     </Routes>
   );
 }

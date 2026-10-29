@@ -4,7 +4,7 @@ Schema, RLS, triggers and functions for sip-happens. Owner applies them by hand.
 
 ## Apply the migrations
 
-Migrations are plain numbered files (`0001_init.sql` to `0004_validate_other_subtype.sql`), not timestamp-named, and there is no `supabase/config.toml`. `supabase db push` and `supabase migration` do not apply here. Run the files by hand, in numeric order.
+Migrations are plain numbered files (`0001_init.sql` to `0005_invite_revoke_and_resolved_at.sql`), not timestamp-named, and there is no `supabase/config.toml`. `supabase db push` and `supabase migration` do not apply here. Run the files by hand, in numeric order.
 
 **Option A: SQL editor (simplest)**
 
@@ -21,6 +21,7 @@ Migrations are plain numbered files (`0001_init.sql` to `0004_validate_other_sub
    | `functions_and_privileges.sql` | execute grants, `create_reset_request` caps, `claim_link`, `revoke_sessions`                                             |
    | `admin_paths.sql`              | what admins can and cannot do, disabled admin loses all power                                                            |
    | `inactive_user.sql`            | banned user or profile-less token can read but not write, un-ban is immediate                                            |
+   | `invites_and_resets.sql`       | invite revoke by creator only (unused, unexpired), `reset_requests.resolved_at` set by trigger, not client-writable      |
 
 **Option B: CLI, one file at a time**
 

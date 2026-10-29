@@ -6,6 +6,8 @@ import { authorScore } from "#shared/lib/score.js";
 export interface DrinkReviewRow {
   review: Review;
   nick: string;
+  /** The author is banned. */
+  disabled: boolean;
   score: number | null;
 }
 
@@ -16,16 +18,17 @@ export interface DrinkReviewRow {
 export function buildDrinkReviewRows(
   drink: Drink,
   reviews: readonly Review[],
-  profiles: readonly { id: string; nick: string }[],
+  profiles: readonly { id: string; nick: string; disabled?: boolean }[],
   unknownNick: string,
 ): DrinkReviewRow[] {
-  const nicks = new Map(profiles.map((p) => [p.id, p.nick]));
+  const byId = new Map(profiles.map((p) => [p.id, p]));
   const group = groupOf(drink.type);
   return reviews
     .filter((r) => r.drink_id === drink.id)
     .map((r) => ({
       review: r,
-      nick: nicks.get(r.author_id) ?? unknownNick,
+      nick: byId.get(r.author_id)?.nick ?? unknownNick,
+      disabled: byId.get(r.author_id)?.disabled ?? false,
       score: authorScore(group, r),
     }))
     .sort((a, b) => (b.score ?? -1) - (a.score ?? -1));

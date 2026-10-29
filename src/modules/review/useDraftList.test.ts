@@ -4,7 +4,9 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const listDrafts = vi.fn();
 const clearDrafts = vi.fn();
+let settle: () => Promise<void> = async () => {};
 vi.mock("./drafts.js", () => ({
+  whenDraftWritesSettled: () => settle(),
   listDrafts: (...a: unknown[]) => listDrafts(...a),
   clearDrafts: (...a: unknown[]) => clearDrafts(...a),
 }));
@@ -17,6 +19,7 @@ describe("useDraftList", () => {
   beforeEach(() => {
     listDrafts.mockReset();
     clearDrafts.mockReset();
+    settle = async () => {};
   });
 
   it("stays empty without a user", async () => {
@@ -38,5 +41,16 @@ describe("useDraftList", () => {
     });
     expect(clearDrafts).toHaveBeenCalledWith("u1", "a");
     expect(result.current.drafts.map((d) => d.context)).toEqual(["b"]);
+  });
+
+  it("waits for pending draft writes before listing", async () => {
+    let release!: () => void;
+    settle = () => new Promise<void>((r) => (release = r));
+    listDrafts.mockResolvedValue([entry("a")]);
+    const { result } = renderHook(() => useDraftList("u1"));
+    await act(async () => {});
+    expect(listDrafts).not.toHaveBeenCalled();
+    await act(async () => release());
+    await waitFor(() => expect(result.current.drafts).toHaveLength(1));
   });
 });

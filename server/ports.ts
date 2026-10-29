@@ -19,8 +19,17 @@ export interface ProfileRow {
   disabled: boolean;
 }
 
+/**
+ * A definite failure (Auth answered with an error). Ambiguous failures (network, timeout, 5xx)
+ * are thrown instead, because the user may or may not have been created.
+ */
 export type CreateUserResult =
-  { ok: true; userId: string } | { ok: false; reason: "exists" | "other" };
+  | { ok: true; userId: string }
+  | { ok: false; reason: "exists" | "weak_password" | "other" };
+
+/** Same contract as CreateUserResult: ambiguous failures throw. */
+export type UpdatePasswordResult =
+  { ok: true } | { ok: false; reason: "weak_password" | "other" };
 
 export interface Ports {
   links: {
@@ -44,7 +53,10 @@ export interface Ports {
       nick: string;
       invitedBy: string | null;
     }): Promise<CreateUserResult>;
-    updatePassword(userId: string, password: string): Promise<void>;
+    updatePassword(
+      userId: string,
+      password: string,
+    ): Promise<UpdatePasswordResult>;
     /** Verifies an access token; returns the user id or null. */
     verifyJwt(jwt: string): Promise<string | null>;
     deleteUser(userId: string): Promise<void>;

@@ -3,12 +3,14 @@ import type { DrinkType } from "#contract/domain.js";
 import { strings } from "#shared/strings.js";
 import { cardClass } from "#shared/ui/Card.js";
 import { ScoreBadge } from "#shared/ui/ScoreBadge.js";
+import { Tag } from "#shared/ui/Tag.js";
 import type { DrinkReviewRow } from "./drinkReviews.js";
 import { StageBlock } from "./StageBlock.js";
+import { catalogStrings as t } from "./strings.js";
 
 /** One review of a drink: author link, score and both stages. */
 export function DrinkReviewCard({
-  row: { review, nick, score },
+  row: { review, nick, disabled, score },
   type,
 }: {
   row: DrinkReviewRow;
@@ -19,9 +21,10 @@ export function DrinkReviewCard({
       <div className="flex items-center justify-between gap-3">
         <Link
           to={`/people/${review.author_id}`}
-          className="flex min-h-11 items-center font-medium text-amber-400"
+          className="flex min-h-11 items-center gap-2 font-medium text-amber-400"
         >
           {nick}
+          {disabled && <Tag tone="danger">{t.drink.banned}</Tag>}
         </Link>
         <ScoreBadge score={score} />
       </div>

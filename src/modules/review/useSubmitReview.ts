@@ -15,7 +15,12 @@ import {
 } from "#modules/subtypes/index.js";
 import type { Drink, DrinkGroup, DrinkType, Review } from "#contract/domain.js";
 import { clearDrafts } from "./drafts.js";
-import { createDrink, insertReview, updateReview } from "./queries.js";
+import {
+  createDrink,
+  insertReview,
+  updateDrink,
+  updateReview,
+} from "./queries.js";
 import { findConflict } from "./reviewForm.js";
 import { reviewStrings as s } from "./strings.js";
 
@@ -47,7 +52,17 @@ export function useSubmitReview(a: Args) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const ensureSubtype = useEnsureSubtype();
-  const createdRef = useRef<Record<string, string>>({});
+  // The drink this form already created. It stays bound across name/type edits so a retry
+  // updates it instead of creating a second one and orphaning the first.
+  const createdRef = useRef<{
+    id: string;
+    name: string;
+    type: DrinkType;
+  } | null>(null);
+
+  function forgetCreated() {
+    createdRef.current = null;
+  }
 
   async function resolveConflict() {
     await queryClient.refetchQueries({ queryKey: queryKeys.drinks });
@@ -61,8 +76,13 @@ export function useSubmitReview(a: Args) {
     const { state, group, effectiveType, userId, context, drink, subtype } = a;
     if (!state?.canSave || !group || !effectiveType || !userId || !context)
       return;
+    const created = createdRef.current;
+    const name = a.name.trim();
+    const needsDrinkWrite =
+      !drink &&
+      (!created || created.name !== name || created.type !== effectiveType);
     const needsSubtype =
-      !drink && !createdRef.current[context] && effectiveType === "other";
+      needsDrinkWrite && effectiveType === "other" && !created;
     if (needsSubtype && !hasSubtype(subtype.value)) {
       subtype.setRequired(true);
       return;
@@ -71,8 +91,8 @@ export function useSubmitReview(a: Args) {
     a.setError(null);
     a.setConflict(null);
     try {
-      let targetId = drink?.id ?? createdRef.current[context];
-      if (!targetId) {
+      let targetId = drink?.id ?? created?.id;
+      if (needsDrinkWrite) {
         let subtypeId: string | null = null;
         if (effectiveType === "other") {
           const ensured = await ensureSubtype(subtype.value);
@@ -91,19 +111,19 @@ export function useSubmitReview(a: Args) {
           // Keep the saved id so a retry after a failed drink insert does not re-create the subtype.
           subtype.setValue({ subtypeId, newName: null });
         }
-        const created = await createDrink({
-          name: a.name.trim(),
-          type: effectiveType,
-          subtypeId,
-        });
-        if ("duplicate" in created) {
+        const input = { name, type: effectiveType, subtypeId };
+        const written = created
+          ? await updateDrink(created.id, input)
+          : await createDrink(input);
+        if ("duplicate" in written) {
           await resolveConflict();
           a.setSaving(false);
           return;
         }
-        targetId = created.id;
-        createdRef.current[context] = targetId;
+        targetId = written.id;
+        createdRef.current = { id: targetId, name, type: effectiveType };
       }
+      if (!targetId) return;
       const row = toReviewRow(group, a.draft, state);
       if (a.myReview) {
         const updated = await updateReview(a.myReview.id, row);
@@ -113,7 +133,16 @@ export function useSubmitReview(a: Args) {
           throw new Error("review_not_updated");
         }
       } else {
-        await insertReview(targetId, row);
+        const inserted = await insertReview(targetId, row);
+        if (inserted) {
+          // A review already exists on the server (stale cache): update it instead.
+          await queryClient.refetchQueries({ queryKey: queryKeys.reviews });
+          const existing = queryClient
+            .getQueryData<Review[]>(queryKeys.reviews)
+            ?.find((r) => r.drink_id === targetId && r.author_id === userId);
+          if (!existing || !(await updateReview(existing.id, row)))
+            throw new Error("review_not_updated");
+        }
       }
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: queryKeys.drinks }),
@@ -127,5 +156,5 @@ export function useSubmitReview(a: Args) {
     }
   }
 
-  return onSave;
+  return { onSave, forgetCreated };
 }

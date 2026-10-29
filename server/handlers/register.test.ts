@@ -93,10 +93,31 @@ describe("register", () => {
     expect(p.links.release).toHaveBeenCalledWith(TOKEN);
   });
 
-  it("releases the claim and rethrows when createUser throws", async () => {
+  it("keeps the claim consumed and rethrows when createUser throws (ambiguous)", async () => {
     const p = fakePorts();
     p.auth.createUser.mockRejectedValue(new Error("boom"));
     await expect(register({ ports: asPorts(p) }, body)).rejects.toThrow("boom");
+    expect(p.links.release).not.toHaveBeenCalled();
+  });
+
+  it("releases the claim and rethrows when a lookup before createUser throws", async () => {
+    const p = fakePorts();
+    p.profiles.nickExists.mockRejectedValue(new Error("db down"));
+    await expect(register({ ports: asPorts(p) }, body)).rejects.toThrow(
+      "db down",
+    );
+    expect(p.links.release).toHaveBeenCalledWith(TOKEN);
+    expect(p.auth.createUser).not.toHaveBeenCalled();
+  });
+
+  it("maps a weak password to invalid_input and releases the claim", async () => {
+    const p = fakePorts();
+    p.auth.createUser.mockResolvedValue({ ok: false, reason: "weak_password" });
+    const res = await register({ ports: asPorts(p) }, body);
+    expect(res).toEqual({
+      status: 400,
+      body: { ok: false, error: "invalid_input" },
+    });
     expect(p.links.release).toHaveBeenCalledWith(TOKEN);
   });
 

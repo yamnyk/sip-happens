@@ -7,7 +7,7 @@ import { ErrorText, PageTitle } from "#shared/ui/Status.js";
 import { InviteListItem } from "./InviteListItem.js";
 import { inviteState } from "./inviteState.js";
 import { NewLinkCard } from "./NewLinkCard.js";
-import { useCreateInvite, useInviteLinks } from "./queries.js";
+import { useCreateInvite, useInviteLinks, useRevokeInvite } from "./queries.js";
 import { inviteStrings as s } from "./strings.js";
 import { useCopy } from "./useCopy.js";
 
@@ -24,6 +24,7 @@ export function InvitesPage() {
 
   const links = useInviteLinks(myId);
   const create = useCreateInvite(myId, setFresh);
+  const revoke = useRevokeInvite(myId);
 
   const nickOf = (id: string | null) =>
     profiles.data?.find((p) => p.id === id)?.nick ?? s.usedUnknown;
@@ -69,6 +70,9 @@ export function InvitesPage() {
               state={inviteState(l, now, nickOf)}
               copied={copied === l.token}
               onCopy={() => void copy(l.token, inviteUrl(l.token))}
+              onRevoke={() => revoke.mutate(l.token)}
+              revoking={revoke.isPending && revoke.variables === l.token}
+              revokeFailed={revoke.isError && revoke.variables === l.token}
             />
           ))}
         </ul>

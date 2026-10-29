@@ -46,7 +46,7 @@ Rules:
 ## First-time setup
 
 1. `pnpm install`, then `cp .env.example .env.local` and fill in the `VITE_` values.
-2. Apply the schema per [`supabase/README.md`](supabase/README.md): paste every file in `supabase/migrations/` (`0001` to `0004`) into the SQL editor in numeric order, one Run per file. Then in the Supabase dashboard, Authentication, Sign In / Providers: public signups stay disabled and email confirmations stay off.
+2. Apply the schema per [`supabase/README.md`](supabase/README.md): paste every file in `supabase/migrations/` (`0001` to `0005`) into the SQL editor in numeric order, one Run per file. Then in the Supabase dashboard, Authentication, Sign In / Providers: public signups stay disabled and email confirmations stay off.
 3. In the Supabase dashboard, Project Settings, API Keys, Secret keys: copy the secret key into `.env.local` as `SUPABASE_SECRET_KEY`.
 4. Generate a cron secret with `openssl rand -hex 32` and put it into `.env.local` as `CRON_SECRET`.
 5. Run `pnpm bootstrap-admin` and enter the first admin's nick and password.
@@ -73,7 +73,7 @@ src/modules/     UI by area: auth, review, catalog, people, invites, admin, subt
 src/shared/      api (supabase client, queries, callApi), lib, config, ui, strings.ts
 server/          handlers (pure logic), ports, http helpers
 api/             six thin Vercel Function wrappers
-supabase/        migrations 0001-0004, SQL tests
+supabase/        migrations 0001-0005, SQL tests
 scripts/         bootstrap-admin
 docs/            conventions.md and review notes
 ```

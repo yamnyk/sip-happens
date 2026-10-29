@@ -10,6 +10,7 @@ import {
   AdminApiError,
   useAdminUserAction,
   useDismissRequest,
+  useResetLinks,
   useResetRequests,
   useResolveReset,
 } from "./queries.js";
@@ -27,7 +28,7 @@ export function AdminPage() {
   const resolve = useResolveReset(me?.id ?? "");
   const dismiss = useDismissRequest(me?.id ?? "");
   const userAction = useAdminUserAction();
-  const [links, setLinks] = useState<Record<string, string>>({});
+  const resetLinks = useResetLinks();
   const [error, setError] = useState<string | null>(null);
 
   const reviewCounts = useMemo(
@@ -60,14 +61,7 @@ export function AdminPage() {
 
   function onResolve(userId: string) {
     setError(null);
-    resolve.mutate(userId, {
-      onSuccess: (token) =>
-        setLinks((prev) => ({
-          ...prev,
-          [userId]: `${location.origin}/reset/${token}`,
-        })),
-      onError: reportError,
-    });
+    resolve.mutate(userId, { onError: reportError });
   }
 
   function onUserAction(p: Profile, action: "delete" | "ban" | "unban") {
@@ -94,7 +88,11 @@ export function AdminPage() {
               reviewCount={reviewCounts.get(p.id) ?? 0}
               pending={pendingUserIds.has(p.id)}
               isMe={p.id === me?.id}
-              link={links[p.id]}
+              link={
+                resetLinks.data?.[p.id]
+                  ? `${location.origin}/reset/${resetLinks.data[p.id]}`
+                  : undefined
+              }
               resolveDisabled={resolve.isPending}
               actionDisabled={userAction.isPending}
               onResolve={onResolve}

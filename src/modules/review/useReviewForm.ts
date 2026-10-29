@@ -68,7 +68,7 @@ export function useReviewForm() {
     [group, draft],
   );
 
-  const onSave = useSubmitReview({
+  const { onSave, forgetCreated } = useSubmitReview({
     userId,
     context,
     name,
@@ -96,12 +96,14 @@ export function useReviewForm() {
 
   function pickDrink(d: Drink) {
     picker.pick(d);
+    forgetCreated();
     setError(null);
     form.pruneTo(groupOf(d.type));
   }
 
   function changeDrink() {
     picker.clear();
+    forgetCreated();
     setError(null);
     form.reset();
     if (drinkId) navigate("/add");

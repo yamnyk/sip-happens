@@ -46,5 +46,6 @@ export const catalogStrings = {
     nameRequired: "Назва не може бути порожньою",
     emptyScore: "-",
     unknownNick: "?",
+    banned: "заблокований",
   },
 } as const;

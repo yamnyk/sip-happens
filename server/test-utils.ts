@@ -31,7 +31,7 @@ export function fakePorts(): {
     },
     auth: {
       createUser: vi.fn().mockResolvedValue({ ok: true, userId: USER_ID }),
-      updatePassword: vi.fn().mockResolvedValue(undefined),
+      updatePassword: vi.fn().mockResolvedValue({ ok: true }),
       verifyJwt: vi.fn().mockResolvedValue(ADMIN_ID),
       deleteUser: vi.fn().mockResolvedValue(undefined),
       setBanned: vi.fn().mockResolvedValue(undefined),

@@ -4,7 +4,8 @@ import type { Deps } from "../ports.js";
 import { fail, ok, type HandlerResult } from "./common.js";
 
 /**
- * Claim the invite atomically, create the user, release the claim on any failure.
+ * Claim the invite atomically, create the user, release the claim on a definite failure.
+ * If createUser throws (timeout, network) the user may exist, so the claim stays consumed.
  * Unknown, expired and used tokens are indistinguishable (all invalid_token).
  */
 export async function register(
@@ -27,6 +28,7 @@ export async function register(
     }
   };
 
+  let creating = false;
   try {
     const normalized = normalizeNick(nick);
     if (await ports.profiles.nickExists(normalized)) {
@@ -34,15 +36,19 @@ export async function register(
       return fail("nick_taken");
     }
 
+    const email = await nickToEmail(nick);
+    creating = true;
     const created = await ports.auth.createUser({
-      email: await nickToEmail(nick),
+      email,
       password,
       nick,
       invitedBy: claim.createdBy,
     });
+    creating = false;
 
     if (!created.ok) {
       await release();
+      if (created.reason === "weak_password") return fail("invalid_input");
       // The profile trigger rejects duplicate nicks, which surfaces as a generic createUser failure.
       if (
         created.reason === "exists" ||
@@ -60,7 +66,8 @@ export async function register(
     }
     return ok();
   } catch (error) {
-    await release();
+    // Ambiguous outcome while creating: keep the claim consumed so the link cannot be reused.
+    if (!creating) await release();
     throw error;
   }
 }

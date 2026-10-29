@@ -3,7 +3,12 @@ import { createPorts } from "./supabase-admin.js";
 
 type Res = {
   data?: unknown;
-  error?: { message: string; code?: string } | null;
+  error?: {
+    message: string;
+    code?: string;
+    name?: string;
+    status?: number;
+  } | null;
 };
 
 function makeChain(res: Res): unknown {
@@ -139,6 +144,36 @@ describe("createPorts error mapping", () => {
     expect(
       await ports(fakeClient({ data: null })).links.inviteInfo("t"),
     ).toBeNull();
+  });
+
+  it("maps weak_password and throws on ambiguous Auth errors", async () => {
+    const input = { email: "e", password: "p", nick: "n", invitedBy: null };
+    const weak = { message: "x", code: "weak_password", status: 422 };
+    expect(
+      await ports(fakeClient({ error: weak })).auth.createUser(input),
+    ).toEqual({ ok: false, reason: "weak_password" });
+    expect(
+      await ports(fakeClient({ error: weak })).auth.updatePassword("u", "p"),
+    ).toEqual({ ok: false, reason: "weak_password" });
+    expect(
+      await ports(
+        fakeClient({ error: { message: "x", code: "other", status: 400 } }),
+      ).auth.updatePassword("u", "p"),
+    ).toEqual({ ok: false, reason: "other" });
+    expect(await ports(fakeClient({})).auth.updatePassword("u", "p")).toEqual({
+      ok: true,
+    });
+    for (const error of [
+      { message: "x", name: "AuthRetryableFetchError", status: 0 },
+      { message: "x", status: 502, code: "unexpected_failure" },
+    ]) {
+      await expect(
+        ports(fakeClient({ error })).auth.createUser(input),
+      ).rejects.toThrow("create user failed");
+      await expect(
+        ports(fakeClient({ error })).auth.updatePassword("u", "p"),
+      ).rejects.toThrow("update password failed");
+    }
   });
 
   it("createUser maps exists codes to exists and others to other", async () => {

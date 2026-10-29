@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import { act, renderHook } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import type { Review } from "#contract/domain.js";
 import { EMPTY_SUBTYPE } from "#modules/subtypes/index.js";
 
 const persist = vi.fn(async () => {});
@@ -56,5 +57,31 @@ describe("useReviewDraft", () => {
     act(() => void vi.advanceTimersByTime(1000));
     unmount();
     expect(persist).not.toHaveBeenCalled();
+  });
+
+  it("reset re-arms the stage init so the next drink opens on its own stage", async () => {
+    const review = {
+      first_scores: { aroma: 3 },
+      final_note: null,
+    } as unknown as Review;
+    const { result, rerender } = renderHook((p) => useReviewDraft(p), {
+      initialProps: {
+        ...args,
+        context: "a",
+        myReview: review as Review | undefined,
+      },
+    });
+    await act(async () => {});
+    expect(result.current.stage).toBe("final");
+
+    act(() => result.current.reset());
+    rerender({ ...args, context: "b", myReview: undefined });
+    await act(async () => {});
+    expect(result.current.stage).toBe("first");
+
+    act(() => result.current.reset());
+    rerender({ ...args, context: "c", myReview: review });
+    await act(async () => {});
+    expect(result.current.stage).toBe("final");
   });
 });

@@ -197,10 +197,33 @@ export async function listDrafts(userId: string): Promise<DraftEntry[]> {
   }
 }
 
-export async function clearDrafts(
+// Writes are serialized per context so a clear can never be overtaken by an older in-flight persist.
+const chains = new Map<string, Promise<void>>();
+const pending = new Set<Promise<void>>();
+
+function enqueue(
   userId: string,
   context: string,
+  task: () => Promise<void>,
 ): Promise<void> {
+  const key = `${userId}:${context}`;
+  const run = (chains.get(key) ?? Promise.resolve()).then(task, task);
+  const tail = run.catch(() => {});
+  chains.set(key, tail);
+  pending.add(tail);
+  void tail.then(() => {
+    pending.delete(tail);
+    if (chains.get(key) === tail) chains.delete(key);
+  });
+  return run;
+}
+
+/** Resolves once every draft write queued so far has finished. Never rejects. */
+export async function whenDraftWritesSettled(): Promise<void> {
+  while (pending.size > 0) await Promise.all([...pending]);
+}
+
+async function clearNow(userId: string, context: string): Promise<void> {
   try {
     await Promise.all([
       ...STAGES.map((s) => del(draftKey(userId, context, s))),
@@ -211,8 +234,23 @@ export async function clearDrafts(
   }
 }
 
+export function clearDrafts(userId: string, context: string): Promise<void> {
+  return enqueue(userId, context, () => clearNow(userId, context));
+}
+
 /** Persists both stages plus the per-context meta (so the draft is listed and resumable). Never throws. */
-export async function persistDrafts(
+export function persistDrafts(
+  userId: string,
+  context: string,
+  draft: ReviewDraft,
+  meta: { name: string; type: DrinkType | null; subtype: SubtypeValue },
+): Promise<void> {
+  return enqueue(userId, context, () =>
+    persistNow(userId, context, draft, meta),
+  );
+}
+
+async function persistNow(
   userId: string,
   context: string,
   draft: ReviewDraft,
@@ -223,5 +261,5 @@ export async function persistDrafts(
   );
   if (STAGES.some((st) => hasInput(draft[st])))
     await saveDraftMeta(userId, context, { ...meta, updatedAt: Date.now() });
-  else await clearDrafts(userId, context);
+  else await clearNow(userId, context);
 }

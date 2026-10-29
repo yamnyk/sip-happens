@@ -24,6 +24,20 @@ describe("validateNick", () => {
   });
 });
 
+describe("validateNick scripts", () => {
+  it("rejects mixing Latin and Cyrillic", () => {
+    expect(validateNick("Ivanка")).toBe("nick_mixed_scripts");
+    expect(validateNick("Гоgi")).toBe("nick_mixed_scripts");
+  });
+
+  it("allows one script plus digits and punctuation", () => {
+    expect(validateNick("Gogi_99")).toBeNull();
+    expect(validateNick("Гоги-2000")).toBeNull();
+    expect(validateNick("Іван_007")).toBeNull();
+    expect(validateNick("a.b-c 1")).toBeNull();
+  });
+});
+
 describe("nickToEmail", () => {
   it("is deterministic and case-insensitive", async () => {
     expect(await nickToEmail("Gogi")).toBe(await nickToEmail("gOGI"));

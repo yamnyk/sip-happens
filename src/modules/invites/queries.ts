@@ -43,3 +43,21 @@ export function useCreateInvite(
     },
   });
 }
+
+/** Revokes (deletes) one of the user's own unused invite links. Fails when nothing was removed. */
+export function useRevokeInvite(userId: string | undefined) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (token: string) => {
+      const { data, error } = await supabase
+        .from("links")
+        .delete()
+        .eq("token", token)
+        .select("token");
+      if (error) throw error;
+      if (data.length === 0) throw new Error("invite not revoked");
+    },
+    onSettled: () =>
+      queryClient.invalidateQueries({ queryKey: linksKey(userId) }),
+  });
+}
