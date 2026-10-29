@@ -8,10 +8,10 @@ Vite, React 19, TypeScript 7, Tailwind v4, react-router, TanStack Query, zod, Su
 
 ## Layout
 
-- `contract/`: the only code shared by client and server: `nick.ts` (`nickToEmail`), `schemas.ts` (zod), `domain.ts` (types). No UI or client imports.
+- `contract/`: the only code shared by client and server: `nick.ts` (`nickToEmail`), `schemas.ts` (zod), `domain.ts` (types), `database.ts` (typed `Database`, narrows generated columns). `database.types.ts` is generated: `pnpm dlx supabase gen types typescript --project-id <ref> --schema public > contract/database.types.ts`, never edit by hand. No UI or client imports.
 - `src/app/`: shell only (`App.tsx` routes, `providers.tsx`, `Layout.tsx`).
 - `src/modules/<area>/` (`auth`, `review`, `catalog`, `people`, `invites`, `admin`, `subtypes`): UI by area. Each has an `index.ts` public API; other modules import only from it.
-- `src/shared/`: client code used by several modules: `api/` (supabase client, fetch-all queries, `callApi`), `lib/` (`score.ts`, `review.ts`, ...), `config/criteria.ts` (single source of truth for drink types, criteria and weights), `ui/`, `types/`, `strings.ts`.
+- `src/shared/`: client code used by several modules: `api/` (supabase client, fetch-all queries, `callApi`), `lib/` (`score.ts`, `review.ts`, ...), `config/criteria.ts` (single source of truth for drink types, criteria and weights), `ui/`, `strings.ts`.
 - UI text: `src/shared/strings.ts` (shared) and `src/modules/*/strings.ts`. Criterion labels stay in `criteria.ts`.
 - Imports: `#app/*`, `#modules/*`, `#shared/*`, `#contract/*`, `#server/*` (package.json `imports`), always ending in `.js`. Same-folder imports use `./x.js`; no `../`. Enforced by `pnpm lint`.
 - `server/handlers/`: pure handler logic `(deps, input) => result`, unit-tested with mocked Supabase.

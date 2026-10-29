@@ -1,14 +1,16 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { getSupabaseEnv } from "./env.js";
+import type { Database } from "../contract/database.js";
 import type { Ports } from "./ports.js";
 
 /** Service-role client. Server only. Never import from src/. */
-let cached: SupabaseClient | null = null;
+type AdminClient = SupabaseClient<Database>;
+let cached: AdminClient | null = null;
 
-export function getAdminClient(): SupabaseClient {
+export function getAdminClient(): AdminClient {
   if (!cached) {
     const { url, secretKey } = getSupabaseEnv();
-    cached = createClient(url, secretKey, {
+    cached = createClient<Database>(url, secretKey, {
       auth: { persistSession: false, autoRefreshToken: false },
     });
   }
@@ -18,7 +20,7 @@ export function getAdminClient(): SupabaseClient {
 /** Ban duration far enough out to be permanent for this app. */
 const BAN_FOREVER = "876000h";
 
-export function createPorts(client: SupabaseClient = getAdminClient()): Ports {
+export function createPorts(client: AdminClient = getAdminClient()): Ports {
   return {
     links: {
       async claim(token, kind) {
@@ -66,9 +68,7 @@ export function createPorts(client: SupabaseClient = getAdminClient()): Ports {
           .maybeSingle();
         if (profile.error)
           throw new Error(`inviter lookup failed: ${profile.error.message}`);
-        return profile.data?.nick
-          ? { inviterNick: profile.data.nick as string }
-          : null;
+        return profile.data?.nick ? { inviterNick: profile.data.nick } : null;
       },
     },
     profiles: {
