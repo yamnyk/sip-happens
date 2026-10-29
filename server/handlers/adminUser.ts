@@ -1,5 +1,5 @@
-import { adminUserBodySchema } from "../../contract/schemas.js";
-import type { Deps } from "../ports.js";
+import { adminUserBodySchema } from "#contract/schemas.js";
+import type { Deps } from "#server/ports.js";
 import { fail, ok, parseBearer, type HandlerResult } from "./common.js";
 
 export interface AdminUserInput {

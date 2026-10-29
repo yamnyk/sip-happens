@@ -132,9 +132,8 @@ On a Vercel preview:
 ## Status
 
 - **Verified by the owner:** `0001_init.sql` was applied and the app works "okay-ish" locally. Migrations `0001` to `0004` are applied to the hosted project, and every script in `supabase/tests/` passed there (2026-10-29).
-- **Not verified:** the Vercel preview deployment has not been tested.
+- **Verified by the owner:** a Vercel preview serves `/api/*` with `#` subpath imports (2026-10-29).
 - **Not verified:** the PWA install has not been tested on a device.
 - **Not verified:** `pnpm bootstrap-admin` has not been run.
 - **Not verified:** `revoke_sessions()` deletes from `auth.sessions`; the function owner needs that privilege on the Supabase `auth` schema. If it fails, bans and password resets still apply but old refresh tokens survive; the handlers log the failure and continue.
-- **Not verified:** `/api/*` on Vercel. Server code uses `.js` import extensions, and `api/invite-status.ts` is the canary for `#` subpath aliases (`package.json` `imports`); confirm on the first preview that it loads, then the rest of `server/`, `api/` and `scripts/` can switch to aliases.
 - **Known gaps (accepted):** `GET /api/invite-status?token=` puts the token in a query string (Vercel logs); JS `toLowerCase` and Postgres `lower` can disagree on rare Unicode nicks (the unique index still protects identity); login brute-force relies on Supabase Auth rate limits; `register` can leave a released invite if GoTrue created the user but the response was lost.

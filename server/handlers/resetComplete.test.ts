@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { asPorts, fakePorts, TOKEN, USER_ID } from "../test-utils.js";
+import { asPorts, fakePorts, TOKEN, USER_ID } from "#server/test-utils.js";
 import { resetComplete } from "./resetComplete.js";
 
 describe("resetComplete", () => {

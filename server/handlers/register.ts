@@ -1,6 +1,6 @@
-import { nickToEmail, normalizeNick } from "../../contract/nick.js";
-import { registerBodySchema } from "../../contract/schemas.js";
-import type { Deps } from "../ports.js";
+import { nickToEmail, normalizeNick } from "#contract/nick.js";
+import { registerBodySchema } from "#contract/schemas.js";
+import type { Deps } from "#server/ports.js";
 import { fail, ok, type HandlerResult } from "./common.js";
 
 /**

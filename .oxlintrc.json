@@ -92,6 +92,10 @@
                   "**/src/**"
                 ],
                 "message": "Server code imports only contract/ and server/."
+              },
+              {
+                "group": ["../*"],
+                "message": "Use a # alias instead of a parent-relative import."
               }
             ]
           }

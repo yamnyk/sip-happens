@@ -1,8 +1,8 @@
 import {
   inviteStatusQuerySchema,
   type InviteStatus,
-} from "../../contract/schemas.js";
-import type { Deps } from "../ports.js";
+} from "#contract/schemas.js";
+import type { Deps } from "#server/ports.js";
 import { ok, type HandlerResult } from "./common.js";
 
 /** Valid flag plus inviter nick only. A malformed token is just "not valid". */

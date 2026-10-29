@@ -1,4 +1,4 @@
-import type { HandlerResult } from "./handlers/common.js";
+import type { HandlerResult } from "#server/handlers/common.js";
 
 const HEADERS = {
   "content-type": "application/json; charset=utf-8",

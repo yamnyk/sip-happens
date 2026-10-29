@@ -1,4 +1,4 @@
-import type { LinkKind } from "../contract/domain.js";
+import type { LinkKind } from "#contract/domain.js";
 
 /**
  * Narrow persistence/auth surface the handlers depend on.

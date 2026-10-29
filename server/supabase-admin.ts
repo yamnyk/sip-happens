@@ -1,6 +1,6 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { getSupabaseEnv } from "./env.js";
-import type { Database } from "../contract/database.js";
+import type { Database } from "#contract/database.js";
 import type { Ports } from "./ports.js";
 
 /** Service-role client. Server only. Never import from src/. */

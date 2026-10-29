@@ -15,7 +15,7 @@ Full conventions: [`docs/conventions.md`](docs/conventions.md).
 - `src/modules/<area>/` (`auth`, `review`, `catalog`, `people`, `invites`, `admin`, `subtypes`): UI by area. Each has an `index.ts` public API; other modules import only from it.
 - `src/shared/`: `api/` (supabase client, fetch-all queries, `callApi`), `lib/`, `config/criteria.ts` (single source of truth for drink types, criteria and weights), `ui/` (primitives), `strings.ts`.
 - UI text: `src/shared/strings.ts` and `src/modules/*/strings.ts`. Criterion labels stay in `criteria.ts`.
-- Imports: `#app/*`, `#modules/*`, `#shared/*`, `#contract/*`, `#server/*`, always ending in `.js`. Same-folder imports use `./x.js`; no `../` in `src/`. Enforced by `pnpm lint`. `server/`, `api/`, `scripts/` still use relative imports until a Vercel preview proves `#` aliases there (`api/invite-status.ts` is the canary).
+- Imports: `#app/*`, `#modules/*`, `#shared/*`, `#contract/*`, `#server/*`, always ending in `.js`. Same-folder imports use `./x.js`; no `../` anywhere. Enforced by `pnpm lint`.
 - `server/handlers/`: pure handler logic `(deps, input) => result`, unit-tested with mocked ports.
 - `api/`: thin Web-standard wrappers around `server/handlers/`. Only six routes exist. Do not add more.
 - `supabase/`: migrations `0001` to `0004` (new changes only as new numbered migrations), RLS, triggers, SQL tests. Owner applies them by hand.

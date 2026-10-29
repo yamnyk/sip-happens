@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { asPorts, fakePorts, TOKEN } from "../test-utils.js";
+import { asPorts, fakePorts, TOKEN } from "#server/test-utils.js";
 import { inviteStatus } from "./inviteStatus.js";
 
 describe("inviteStatus", () => {

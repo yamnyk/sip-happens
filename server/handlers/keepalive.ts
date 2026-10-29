@@ -1,4 +1,4 @@
-import type { Deps } from "../ports.js";
+import type { Deps } from "#server/ports.js";
 import {
   fail,
   ok,

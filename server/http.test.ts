@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { fail, ok } from "./handlers/common.js";
+import { fail, ok } from "#server/handlers/common.js";
 import { guard, readJson, toResponse } from "./http.js";
 
 afterEach(() => vi.restoreAllMocks());

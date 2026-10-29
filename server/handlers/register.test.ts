@@ -5,7 +5,7 @@ import {
   INVITER_ID,
   TOKEN,
   USER_ID,
-} from "../test-utils.js";
+} from "#server/test-utils.js";
 import { register } from "./register.js";
 
 const body = { token: TOKEN, nick: "Gogi", password: "supersecret1" };

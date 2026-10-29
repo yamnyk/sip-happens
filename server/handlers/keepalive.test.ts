@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { asPorts, fakePorts } from "../test-utils.js";
+import { asPorts, fakePorts } from "#server/test-utils.js";
 import { keepalive } from "./keepalive.js";
 
 describe("keepalive", () => {
