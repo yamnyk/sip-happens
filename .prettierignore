@@ -1,0 +1,16 @@
+# generated or vendored
+pnpm-lock.yaml
+dist
+dev-dist
+coverage
+public
+contract/database.types.ts
+
+# read-only Supabase skills
+skills
+.agents
+.augment
+.claude
+
+# historical document, kept untouched
+docs/mvp-plan-prompt.md

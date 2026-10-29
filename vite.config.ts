@@ -32,6 +32,11 @@ export default defineConfig({
   test: {
     // Hook tests opt into jsdom per file with a `// @vitest-environment jsdom` comment.
     environment: "node",
+    // Dummy values so modules that create the Supabase client can be imported in tests. No network is used.
+    env: {
+      VITE_SUPABASE_URL: "http://localhost:54321",
+      VITE_SUPABASE_PUBLISHABLE_KEY: "test-publishable-key",
+    },
     include: [
       "src/**/*.test.{ts,tsx}",
       "server/**/*.test.ts",

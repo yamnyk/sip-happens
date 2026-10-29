@@ -1,0 +1,19 @@
+/** Date and time, e.g. "05.03.2026, 14:07". */
+export function formatDateTime(iso: string): string {
+  return new Date(iso).toLocaleString("uk-UA", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+/** Date with short month, e.g. "5 бер. 2026 р.". */
+export function formatDate(iso: string): string {
+  return new Date(iso).toLocaleDateString("uk-UA", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+}

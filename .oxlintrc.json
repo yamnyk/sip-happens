@@ -1,0 +1,102 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["typescript", "react", "oxc", "import", "vitest"],
+  "categories": {
+    "correctness": "error",
+    "suspicious": "error"
+  },
+  "rules": {
+    "react/rules-of-hooks": "error",
+    "react/exhaustive-deps": "error",
+    "react/react-in-jsx-scope": "off",
+    "vitest/require-mock-type-parameters": "off",
+    "import/no-unassigned-import": [
+      "error",
+      {
+        "allow": ["**/*.css"]
+      }
+    ]
+  },
+  "ignorePatterns": [
+    "dist/**",
+    "dev-dist/**",
+    "skills/**",
+    ".agents/**",
+    ".augment/**",
+    ".claude/**",
+    "contract/database.types.ts"
+  ],
+  "overrides": [
+    {
+      "files": ["src/**"],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              {
+                "group": ["../*"],
+                "message": "Use a # alias instead of a parent-relative import."
+              },
+              {
+                "group": ["#modules/*/*", "!#modules/*/index.js"],
+                "message": "Import other modules only through their index.js."
+              },
+              {
+                "group": ["#server/*"],
+                "message": "The client never imports server code."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "files": ["contract/**"],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              {
+                "group": [
+                  "#app/*",
+                  "#modules/*",
+                  "#shared/*",
+                  "#server/*",
+                  "../src/*",
+                  "../server/*",
+                  "react",
+                  "react-*"
+                ],
+                "message": "contract/ is shared by client and server: no UI, client or server imports."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "files": ["server/**", "api/**", "scripts/**"],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              {
+                "group": [
+                  "#app/*",
+                  "#modules/*",
+                  "#shared/*",
+                  "**/src/*",
+                  "**/src/**"
+                ],
+                "message": "Server code imports only contract/ and server/."
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}
