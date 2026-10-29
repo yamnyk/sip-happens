@@ -2,12 +2,14 @@
 
 Schema, RLS, triggers and functions for sip-happens. Owner applies them by hand.
 
-## Apply the migration
+## Apply the migrations
+
+Migrations are plain numbered files (`0001_init.sql` to `0004_validate_other_subtype.sql`), not timestamp-named, and there is no `supabase/config.toml`. `supabase db push` and `supabase migration` do not apply here. Run the files by hand, in numeric order.
 
 **Option A: SQL editor (simplest)**
 
 1. Supabase dashboard, SQL Editor, New query.
-2. Paste the full contents of each file in `supabase/migrations/` in numeric order (`0001_init.sql`, `0002_drink_subtypes.sql`, `0003_reset_request_per_user_cap.sql`, `0004_validate_other_subtype.sql`), one Run per file. All are idempotent, re-running is safe.
+2. Paste the full contents of each file in `supabase/migrations/` in numeric order, one Run per file.
 3. Verify: for each script in `supabase/tests/`, paste it into a new query and Run. Each runs in one transaction and rolls back, so nothing persists. Success is the notice `<script>: all assertions passed`; a failure names the broken guarantee. Run them after every migration change.
 
    | Script                         | Covers                                                                                                                   |
@@ -20,15 +22,25 @@ Schema, RLS, triggers and functions for sip-happens. Owner applies them by hand.
    | `admin_paths.sql`              | what admins can and cannot do, disabled admin loses all power                                                            |
    | `inactive_user.sql`            | banned user or profile-less token can read but not write, un-ban is immediate                                            |
 
-**Option B: CLI**
+**Option B: CLI, one file at a time**
 
 ```bash
 supabase login
 supabase link --project-ref <your-project-ref>
-supabase db push --password "$SB_DB_PASSWORD"
+supabase db query --linked -f supabase/migrations/0001_init.sql
+supabase db query --linked -f supabase/migrations/0002_drink_subtypes.sql
+# ... and so on, in order
 ```
 
-`SB_DB_PASSWORD` is the database password from `.env.local`. Local CLI use only, never set it on Vercel.
+This runs each file through the Management API, so no database password is needed. Still run the SQL tests afterwards (paste them into the SQL editor).
+
+## Re-running
+
+Every migration is written so that re-running it does not fail: tables and indexes use `if not exists`, policies, triggers and constraints use `drop ... if exists` before create, functions use `create or replace`, and `validate constraint` is a no-op on a valid constraint. Be precise about what that means:
+
+- Re-running does not fail, but it also does not change existing tables. `0001` uses `create table if not exists`, so editing a column definition in `0001` and re-running it will not alter a table that already exists. Schema changes to existing tables go into a new numbered migration (`alter table ...`), never into an old file.
+- Functions, policies and triggers are replaced with the current text of the file, so re-running refreshes them.
+- Re-running `0002` after `0004` drops and re-adds `drinks_other_needs_subtype` as `NOT VALID`. Run `0004` again afterwards to validate it.
 
 ## Then
 

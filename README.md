@@ -4,13 +4,13 @@ A friends-only PWA for logging quick reviews of alcohol (mostly wine, port and g
 
 ## Stack
 
-- Vite, React 19, TypeScript
+- Vite, React 19, TypeScript 7
 - Tailwind CSS v4, hand-rolled components
 - react-router, TanStack Query, zod
 - Supabase (Postgres, Auth, Row Level Security)
 - Vercel (static SPA plus Vercel Functions in `api/`)
 - vite-plugin-pwa (installable, online only), idb-keyval (drafts)
-- Vitest for pure logic
+- Vitest (pure logic, hooks with Testing Library, server handlers), Oxlint, Prettier
 
 ## Scripts
 
@@ -19,8 +19,8 @@ A friends-only PWA for logging quick reviews of alcohol (mostly wine, port and g
 | `pnpm dev`                          | Vite dev server                                       |
 | `pnpm build`                        | Typecheck, then production build into `dist/`         |
 | `pnpm typecheck`                    | `tsc --noEmit`                                        |
-| `pnpm test`                         | Vitest (pure logic and handler unit tests)            |
-| `pnpm lint`                         | Oxlint                                                |
+| `pnpm test`                         | Vitest (pure logic, hook and handler unit tests)      |
+| `pnpm lint`                         | Oxlint (also enforces import rules)                   |
 | `pnpm format` / `pnpm format:check` | Prettier write / check                                |
 | `pnpm preview`                      | Serve the built `dist/` locally                       |
 | `pnpm bootstrap-admin`              | Create the first admin (interactive, hidden password) |
@@ -46,7 +46,7 @@ Rules:
 ## First-time setup
 
 1. `pnpm install`, then `cp .env.example .env.local` and fill in the `VITE_` values.
-2. Apply the schema per [`supabase/README.md`](supabase/README.md): run every file in `supabase/migrations/` in numeric order (`0001_init.sql`, `0002_drink_subtypes.sql`) in the SQL editor (or `supabase db push`). Then in the Supabase dashboard, Authentication, Sign In / Providers: public signups stay disabled and email confirmations stay off.
+2. Apply the schema per [`supabase/README.md`](supabase/README.md): paste every file in `supabase/migrations/` (`0001` to `0004`) into the SQL editor in numeric order, one Run per file. Then in the Supabase dashboard, Authentication, Sign In / Providers: public signups stay disabled and email confirmations stay off.
 3. In the Supabase dashboard, Project Settings, API Keys, Secret keys: copy the secret key into `.env.local` as `SUPABASE_SECRET_KEY`.
 4. Generate a cron secret with `openssl rand -hex 32` and put it into `.env.local` as `CRON_SECRET`.
 5. Run `pnpm bootstrap-admin` and enter the first admin's nick and password.
@@ -64,15 +64,31 @@ Rules:
 - **Rewrites:** every path except `/api/*` serves `index.html`, so deep links like `/join/{token}` work.
 - **Local `/api` testing:** use `vercel dev`. Without it, test the functions on a preview deployment.
 
+## Project structure
+
+```
+contract/        shared by client and server: nick, zod schemas, domain and database types
+src/app/         shell: routes, providers, Layout, AppHeader, TabBar
+src/modules/     UI by area: auth, review, catalog, people, invites, admin, subtypes
+src/shared/      api (supabase client, queries, callApi), lib, config, ui, strings.ts
+server/          handlers (pure logic), ports, http helpers
+api/             six thin Vercel Function wrappers
+supabase/        migrations 0001-0004, SQL tests
+scripts/         bootstrap-admin
+docs/            conventions.md and review notes
+```
+
+Rules, naming and layering are in [`docs/conventions.md`](docs/conventions.md).
+
 ## Architecture
 
 - A single-page React app is served as static files and installs as a PWA. It is online only, with no offline sync.
 - The browser talks to Supabase directly with the publishable key. Row Level Security decides what each user can read and write.
 - Only six Vercel Functions exist: `register`, `invite-status`, `reset-request`, `reset-complete`, `admin-user`, `keepalive`.
 - Those functions use the secret key on the server. It never reaches the browser.
-- Handler logic lives in `server/handlers/` as pure functions. Files in `api/` are thin wrappers.
+- Handler logic lives in `server/handlers/` as pure functions `(deps, input) => result`. Files in `api/` are thin wrappers.
 - Login is nickname plus password. Supabase Auth needs an email, so each nick maps to a synthetic address: first 32 hex chars of SHA-256 over the NFC-normalized lowercase nick, at `@sip.invalid`. `nickToEmail()` in `contract/nick.ts` is shared by client and server. No email is ever sent.
-- Criteria and weights live in `src/config/criteria.ts`. Totals are computed in TypeScript, so changing a weight changes every score.
+- Criteria and weights live in `src/shared/config/criteria.ts`. Totals are computed in TypeScript, so changing a weight changes every score.
 
 ## Invite flow
 
@@ -115,10 +131,10 @@ On a Vercel preview:
 
 ## Status
 
-- **Verified by the owner:** `0001_init.sql` was applied and the app works "okay-ish" locally. **Not verified:** `0002_drink_subtypes.sql` has not been run yet.
+- **Verified by the owner:** `0001_init.sql` was applied and the app works "okay-ish" locally. Migrations `0001` to `0004` are applied to the hosted project, and every script in `supabase/tests/` passed there (2026-10-29).
 - **Not verified:** the Vercel preview deployment has not been tested.
 - **Not verified:** the PWA install has not been tested on a device.
 - **Not verified:** `pnpm bootstrap-admin` has not been run.
 - **Not verified:** `revoke_sessions()` deletes from `auth.sessions`; the function owner needs that privilege on the Supabase `auth` schema. If it fails, bans and password resets still apply but old refresh tokens survive; the handlers log the failure and continue.
-- **Not verified:** extensionless-import risk on Vercel was addressed by adding `.js` extensions to server-side imports; confirm on the first preview that `/api/*` loads.
+- **Not verified:** `/api/*` on Vercel. Server code uses `.js` import extensions, and `api/invite-status.ts` is the canary for `#` subpath aliases (`package.json` `imports`); confirm on the first preview that it loads, then the rest of `server/`, `api/` and `scripts/` can switch to aliases.
 - **Known gaps (accepted):** `GET /api/invite-status?token=` puts the token in a query string (Vercel logs); JS `toLowerCase` and Postgres `lower` can disagree on rare Unicode nicks (the unique index still protects identity); login brute-force relies on Supabase Auth rate limits; `register` can leave a released invite if GoTrue created the user but the response was lost.
